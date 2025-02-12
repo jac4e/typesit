@@ -1,23 +1,25 @@
 import { keys } from 'ts-transformer-keys';
-import { IAccount, isIAccount, keysIAccount } from './account';
-import { IProduct, ProductTypes, isIProduct, keysIProduct, keysIProductOrder, keysIProductStock } from './product';
-import { isITransaction, ITransaction, keysITransaction } from './transaction';
-import { IPreOrder, isIPreOrder, keysIPreOrder } from './preorders';
-import { IStockEntry, isIStockEntry, keysIStockEntry } from './stock';
+import { IAccount, isIAccount, keysIAccount } from './account.js';
+import { IProduct, ProductTypes, isIProduct, keysIProduct, keysIProductOrder, keysIProductStock } from './product.js';
+import { isITransaction, ITransaction, keysITransaction } from './transaction.js';
+import { IPreOrder, isIPreOrder, keysIPreOrder } from './preorders.js';
+import { IStockEntry, isIStockEntry, keysIStockEntry } from './stock.js';
+import { isIRefill, keysIRefill } from './refill.js';
 
 // export * from './account';
-export { IAccount, ICredentials, IAccountDocument, IAccountForm, Roles, isIAccount, isIAccountForm, isICredentials } from './account';
+export { IAccount, ICredentials, IAccountDocument, IAccountForm, Roles, isIAccount, isIAccountForm, isICredentials } from './account.js';
 // export * from './cart';
-export { ICartItem, ICartItemSerialized, ICart, ICartSerialized, isICartItem, isICart, isICartSerialized } from './cart';
+export { ICartItem, ICartItemSerialized, ICart, ICartSerialized, isICartItem, isICart, isICartSerialized } from './cart.js';
 // export * from './log';
 // export * from './product';
-export { IProduct, ProductCategories, ProductTypes, isIProduct } from './product';
+export { IProduct, ProductCategories, ProductTypes, isIProduct } from './product.js';
 // export * from './preorders';
-export { IPreOrder, PreOrderStatus, isIPreOrder } from './preorders';
+export { IPreOrder, PreOrderStatus, isIPreOrder } from './preorders.js';
 // export * from './stock';
-export { IStockEntry, StockEntryType, isIStockEntry } from './stock';
+export { IStockEntry, StockEntryType, isIStockEntry } from './stock.js';
 // export * from './transaction';
-export { ITransaction, TransactionType, ITransactionForm, ITransactionItem, ITransactionDocument, isITransaction, isITransactionForm } from './transaction';
+export { ITransaction, TransactionType, ITransactionForm, ITransactionItem, ITransactionDocument, isITransaction, isITransactionForm } from './transaction.js';
+export * from './refill.js';
 
 
 type AvailableTypes = IAccount | ITransaction | IProduct | IProduct<ProductTypes.Stock> | IProduct<ProductTypes.Order> | IPreOrder | IStockEntry;
@@ -45,6 +47,8 @@ export function getKeys<Type>(obj: Type) {
         return keysIPreOrder as (UnionKeys<Type>)[];
     } else if (isIStockEntry(obj)) {
         return keysIStockEntry as (UnionKeys<Type>)[];
+    } else if (isIRefill(obj)) {
+        return keysIRefill as (UnionKeys<Type>)[];
     } else {
         return [];
     }
@@ -103,6 +107,19 @@ export function getValues<Type>(obj: Type) {
             obj.type,
             obj.delta,
             obj.notes,
+        ] as (UnionValues<Type>)[];
+    } else if (isIRefill(obj)) {
+        return [
+            obj.id,
+            obj.account,
+            obj.method,
+            obj.reference,
+            obj.amount,
+            obj.cost,
+            obj.dateCreated,
+            obj.dateUpdated,
+            obj.status,
+            obj.note
         ] as (UnionValues<Type>)[];
     } else {
         return [];
