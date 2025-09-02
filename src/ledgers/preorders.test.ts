@@ -2,12 +2,13 @@ import { IPreOrder, IPreOrderForm, IPreOrderDocument, isIPreOrder, isIPreOrderFo
 
 describe('isIPreOrder', () => {
     it('should return true for a valid IPreOrder object', () => {
-        const preOrder = {
-        date: new Date(),
-        lastUpdated: new Date(),
-        id: '123',
-        accountId: '123',
-        amount: 100n,
+        const preOrder: IPreOrder = {
+        date: new Date('2023-01-01'),
+        lastUpdated: new Date('2023-01-02'),
+        id: 'preorder-1',
+        accountId: 'account-1',
+        productId: 'product-1',
+        amount: 10n,
         status: PreOrderStatus.Ordered,
         };
         expect(isIPreOrder(preOrder)).toBe(true);
@@ -47,9 +48,10 @@ describe('isIPreOrder', () => {
 
 describe('isIPreOrderForm', () => {
     it('should return true for a valid IPreOrderForm object', () => {
-        const preOrderForm = {
-        accountId: '123',
-        amount: 100n,
+        const preOrderForm: IPreOrderForm = {
+        accountId: 'account-1',
+        productId: 'product-1',
+        amount: 10n,
         status: PreOrderStatus.Ordered,
         };
         expect(isIPreOrderForm(preOrderForm)).toBe(true);
