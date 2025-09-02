@@ -16,7 +16,7 @@ These instructions will get you a copy of the project up and running on your loc
 Install the package via npm:
 
 ```bash
-npm install typesit
+npm install https://github.com/jac4e/typesit
 ```
 
 Import types in your TypeScript project:
