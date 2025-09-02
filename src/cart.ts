@@ -1,9 +1,10 @@
+import { ICoin } from "./common";
 import { IProduct } from "./product";
 import typia, { tags } from "typia";
 
 export interface ICartItem extends IProduct {
-    amount: bigint | string;
-    total: bigint | string;
+    amount: ICoin
+    total: ICoin
 }
 
 export interface ICartItemSerialized {

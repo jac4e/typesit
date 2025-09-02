@@ -1,7 +1,8 @@
 import { Document, Model, Schema } from "mongoose";
 import { keys } from "ts-transformer-keys";
 import typia, { tags } from "typia";
-import { IPreOrder } from "./preorders";
+import { IPreOrder } from "./ledgers/preorders";
+import { ICoin, IQuantity } from "./common";
 
 export enum ProductCategories {
   Food = 'food',
@@ -27,24 +28,25 @@ type ProductBase = {
   name: string;
   description?: string;
   image?: string;
-  price: bigint | string; // Sale price
+  price: ICoin // Sale price
   type: ProductTypes;
 }
 
 // Properties that are specific to the type of product, properties must be an object with the same keys as the ProductTypes enum
-type TypedProperties = {
+type ProductTypedProperties = {
   [ProductTypes.Order]: {
-    minimum: bigint | string;
-    current: bigint | string; // Generated from pre-orders journal
+    supplier: string;
+    minimum: IQuantity;
+    current: IQuantity; // Generated from pre-orders journal
   }
-  [ProductTypes.Stock]: bigint | string; // Generated from stock journal
+  [ProductTypes.Stock]: IQuantity; // Generated from stock journal
 }
 
 // An ambiguous product type that contains all typed properties as optional, this means any typed product should be a subset of this type
-type AnyProduct = ProductBase & Partial<TypedProperties>;
+type AnyProduct = ProductBase & Partial<ProductTypedProperties>;
 
 // Public product interface that maps the properties based on typed specified with T, if no type is specified it will default to AnyProduct
-export type IProduct<T = AnyProduct> = T extends ProductTypes ? Omit<ProductBase, 'type'> & {type: T} & { [key in T]: TypedProperties[T] } : AnyProduct;
+export type IProduct<T = AnyProduct> = T extends ProductTypes ? Omit<ProductBase, 'type'> & {type: T} & { [key in T]: ProductTypedProperties[T] } : AnyProduct;
 
 
 // **************************
@@ -54,16 +56,16 @@ export type IProduct<T = AnyProduct> = T extends ProductTypes ? Omit<ProductBase
 type ProductBaseForm = Omit<ProductBase, 'id'>;
 
 // Special typed properties that does not contain generated properties, used for creating new products
-type TypedPropertiesForm = {
-  [ProductTypes.Order]: Omit<TypedProperties[ProductTypes.Order], 'current'>;
-  [ProductTypes.Stock]: TypedProperties[ProductTypes.Stock];
+type ProductTypedPropertiesForm = {
+  [ProductTypes.Order]: Omit<ProductTypedProperties[ProductTypes.Order], 'current'>;
+  [ProductTypes.Stock]: ProductTypedProperties[ProductTypes.Stock];
 }
 
-type AnyProductForm = ProductBaseForm & Partial<TypedPropertiesForm>;
+type AnyProductForm = ProductBaseForm & Partial<ProductTypedPropertiesForm>;
 
 // Product form type that is used to create a new product, it is the same as IProduct but without the id property
-// export type IProductForm<T = AnyProduct> = T extends ProductTypes ? ProductBaseForm & { [key in T]: TypedPropertiesForm[T] } : AnyProductForm;
-export type IProductForm<T = AnyProduct> = T extends ProductTypes ? Omit<ProductBaseForm, 'type'> & {type: T} & { [key in T]: TypedPropertiesForm[T] } : AnyProductForm;
+// export type IProductForm<T = AnyProduct> = T extends ProductTypes ? ProductBaseForm & { [key in T]: ProductTypedPropertiesForm[T] } : AnyProductForm;
+export type IProductForm<T = AnyProduct> = T extends ProductTypes ? Omit<ProductBaseForm, 'type'> & {type: T} & { [key in T]: ProductTypedPropertiesForm[T] } : AnyProductForm;
 
 
 // Alternative approach to IProductForm ?? simpler but less flexible
@@ -72,21 +74,21 @@ export type IProductForm<T = AnyProduct> = T extends ProductTypes ? Omit<Product
 //   name: string;
 //   description?: string;
 //   image?: string;
-//   price: bigint | string;
+//   price: ICoin
 //   type: ProductTypes;
-//   minimum?: bigint | string;
-//   current?: bigint | string;
-//   stock?: bigint | string;
+//   minimum?: IQuantity;
+//   current?: IQuantity;
+//   stock?: IQuantity;
 // }
-// export type IProductForm<T = ProductForm> = T extends ProductTypes ? ProductForm & { [key in T]: TypedPropertiesForm[T] } : ProductForm;
+// export type IProductForm<T = ProductForm> = T extends ProductTypes ? ProductForm & { [key in T]: ProductTypedPropertiesForm[T] } : ProductForm;
 
 // *************************
 // * ProductDocument Types *
 // *************************
 
-type IProductDocumentBase = Omit<IProduct, 'id' | 'price'> & { price: string };
+type IProductDocumentBase = Omit<IProduct, 'id'>;
 
-type TypedPropertiesDocument = {
+export type ProductTypedPropertiesDocument = {
   [ProductTypes.Order]: {
     minimum: string;
     current: string;
@@ -94,8 +96,8 @@ type TypedPropertiesDocument = {
   [ProductTypes.Stock]: string;
 }
 
-type AnyProductDocument = IProductDocumentBase & Partial<TypedPropertiesDocument>;
-type ProductDocument<T = AnyProduct> = T extends ProductTypes ? Omit<IProductDocumentBase, 'type'> & {type: T} & { [key in T]: TypedPropertiesDocument[T] } : AnyProductDocument;
+type AnyProductDocument = IProductDocumentBase & Partial<ProductTypedPropertiesDocument>;
+type ProductDocument<T = AnyProduct> = T extends ProductTypes ? Omit<IProductDocumentBase, 'type'> & {type: T} & { [key in T]: ProductTypedPropertiesDocument[T] } : AnyProductDocument;
 
 export type IProductDocument<T = AnyProduct> = ProductDocument<T> & Document;
 
@@ -122,18 +124,18 @@ export function isIProduct<T extends ProductTypes | AnyProduct = AnyProduct>(pro
     // Although AnyProduct has all typed properties as optional, to be functionally correct, it should have only one typed property
 
     // Check if only one typed property is present
-    const hasOneTypedProperty = Object.keys(product).filter(key => keys<TypedProperties>().includes(key as keyof TypedProperties)).length === 1;
+    const hasOneTypedProperty = Object.keys(product).filter(key => keys<ProductTypedProperties>().includes(key as keyof ProductTypedProperties)).length === 1;
     if (!hasOneTypedProperty) return false;
 
     // Check that the typed property key is valid
-    const typedPropertyKey = Object.keys(product).find(key => keys<TypedProperties>().includes(key as keyof TypedProperties)) as keyof TypedProperties;
+    const typedPropertyKey = Object.keys(product).find(key => keys<ProductTypedProperties>().includes(key as keyof ProductTypedProperties)) as keyof ProductTypedProperties;
     // check if the typed property matches the products specified type
     const productTypeMatches = product.type === typedPropertyKey;
 
     if (!productTypeMatches) return false;
 
     // Do not use T or type here, as this logic is for verifying AnyProduct, not IProduct<T extends ProductTypes>
-    const isTypedPropertyCorrect = typia.equals<TypedProperties[keyof TypedProperties]>(product[typedPropertyKey]);
+    const isTypedPropertyCorrect = typia.equals<ProductTypedProperties[keyof ProductTypedProperties]>(product[typedPropertyKey]);
 
     // Return the results of isTypedPropertyCorrect if type is not specified (aka testing for any product)
     return isTypedPropertyCorrect;
@@ -158,12 +160,12 @@ export function isIProductForm<T extends ProductTypes | AnyProductForm = AnyProd
     // Although AnyProduct has all typed properties as optional, to be functionally correct, it should have only one typed property
 
     // Check if only one typed property is present
-    const hasOneTypedProperty =  Object.keys(product).filter(key => keys<TypedPropertiesForm>().includes(key as keyof TypedPropertiesForm)).length === 1;
+    const hasOneTypedProperty =  Object.keys(product).filter(key => keys<ProductTypedPropertiesForm>().includes(key as keyof ProductTypedPropertiesForm)).length === 1;
 
     if (!hasOneTypedProperty) return false;
 
     // Check that the typed property key is valid
-    const typedPropertyKey = Object.keys(product).find(key => keys<TypedPropertiesForm>().includes(key as keyof TypedPropertiesForm)) as keyof TypedPropertiesForm;
+    const typedPropertyKey = Object.keys(product).find(key => keys<ProductTypedPropertiesForm>().includes(key as keyof ProductTypedPropertiesForm)) as keyof ProductTypedPropertiesForm;
 
     // check if the typed property matches the products specified type
     const productTypeMatches = product.type === typedPropertyKey;
@@ -171,7 +173,7 @@ export function isIProductForm<T extends ProductTypes | AnyProductForm = AnyProd
     if (!productTypeMatches) return false;
 
     // Do not use T or type here, as this logic is for verifying AnyProduct, not IProduct<T extends ProductTypes>
-    const isTypedPropertyCorrect = typia.equals<TypedPropertiesForm[keyof TypedPropertiesForm]>(product[typedPropertyKey]);
+    const isTypedPropertyCorrect = typia.equals<ProductTypedPropertiesForm[keyof ProductTypedPropertiesForm]>(product[typedPropertyKey]);
 
     // Return the results of isTypedPropertyCorrect if type is not specified (aka testing for any product)
     return isTypedPropertyCorrect;
@@ -197,12 +199,12 @@ export function isIProductDocument<T extends ProductTypes | AnyProductDocument =
     // Although AnyProduct has all typed properties as optional, to be functionally correct, it should have only one typed property
 
     // Check if only one typed property is present
-    const hasOneTypedProperty = Object.keys(product).filter(key => keys<TypedPropertiesDocument>().includes(key as keyof TypedPropertiesDocument)).length === 1;
+    const hasOneTypedProperty = Object.keys(product).filter(key => keys<ProductTypedPropertiesDocument>().includes(key as keyof ProductTypedPropertiesDocument)).length === 1;
 
     if (!hasOneTypedProperty) return false;
 
     // Check that the typed property key is valid
-    const typedPropertyKey = Object.keys(product).find(key => keys<TypedPropertiesDocument>().includes(key as keyof TypedPropertiesDocument)) as keyof TypedPropertiesDocument;
+    const typedPropertyKey = Object.keys(product).find(key => keys<ProductTypedPropertiesDocument>().includes(key as keyof ProductTypedPropertiesDocument)) as keyof ProductTypedPropertiesDocument;
 
     // check if the typed property matches the products specified type
     const productTypeMatches = product.type === typedPropertyKey;
@@ -210,7 +212,7 @@ export function isIProductDocument<T extends ProductTypes | AnyProductDocument =
     if (!productTypeMatches) return false;
 
     // Do not use T or type here, as this logic is for verifying AnyProduct, not IProduct<T extends ProductTypes>
-    const isTypedPropertyCorrect = typia.equals<TypedPropertiesDocument[keyof TypedPropertiesDocument]>(product[typedPropertyKey]);
+    const isTypedPropertyCorrect = typia.equals<ProductTypedPropertiesDocument[keyof ProductTypedPropertiesDocument]>(product[typedPropertyKey]);
 
     // Return the results of isTypedPropertyCorrect if type is not specified (aka testing for any product)
     return isTypedPropertyCorrect;
