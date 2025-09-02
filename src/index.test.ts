@@ -102,7 +102,7 @@ const expectedIAccountObjects = [
 const correctITransaction: ITransaction = {
     date: date,
     id: "1234567890",
-    accountid: "0987654321",
+    accountId: "0987654321",
     type: TransactionType.Credit,
     reason: "reason",
     products: [],
@@ -112,7 +112,7 @@ const correctITransaction: ITransaction = {
 const expectedITransactionKeys = [
     'date',
     'id',
-    'accountid',
+    'accountId',
     'type',
     'reason',
     'products',
@@ -132,7 +132,7 @@ const expectedITransactionValues = [
 const expectedITransactionObjects = [
     { key: 'date', value: date },
     { key: 'id', value: "1234567890" },
-    { key: 'accountid', value: "0987654321" },
+    { key: 'accountId', value: "0987654321" },
     { key: 'type', value: TransactionType.Credit },
     { key: 'reason', value: "reason" },
     { key: 'products', value: [] },
@@ -144,6 +144,7 @@ const correctIPreOrder: IPreOrder = {
     lastUpdated: date2,
     id: "1234567890",
     accountId: "0987654321",
+    productId: "0987654321",
     amount: 100n,
     status: PreOrderStatus.Fulfilled
 };
@@ -153,6 +154,7 @@ const expectedIPreOrderKeys = [
     'lastUpdated',
     'id',
     'accountId',
+    'productId',
     'amount',
     'status'
 ];
@@ -171,6 +173,7 @@ const expectedIPreOrderObjects = [
     { key: 'lastUpdated', value: date2 },
     { key: 'id', value: "1234567890" },
     { key: 'accountId', value: "0987654321" },
+    { key: 'productId', value: "0987654321" },
     { key: 'amount', value: 100n },
     { key: 'status', value: PreOrderStatus.Fulfilled }
 ];
@@ -178,7 +181,7 @@ const expectedIPreOrderObjects = [
 const correctIStockEntry: IStockEntry = {
     id: "1234567890",
     date: date,
-    productid: "0987654321",
+    productId: "0987654321",
     cost: 100n,
     type: StockEntryType.Overage,
     delta: 10n,
@@ -188,7 +191,7 @@ const correctIStockEntry: IStockEntry = {
 const expectedIStockEntryKeys = [
     'id',
     'date',
-    'productid',
+    'productId',
     'cost',
     'type',
     'delta',
@@ -208,7 +211,7 @@ const expectedIStockEntryValues = [
 const expectedIStockEntryObjects = [
     { key: 'id', value: "1234567890" },
     { key: 'date', value: date },
-    { key: 'productid', value: "0987654321" },
+    { key: 'productId', value: "0987654321" },
     { key: 'cost', value: 100n },
     { key: 'type', value: StockEntryType.Overage },
     { key: 'delta', value: 10n },

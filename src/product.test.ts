@@ -1,3 +1,4 @@
+import { IQuantity } from "./common";
 import { IProduct, isIProduct, ProductTypes, ProductCategories } from "./product";
 
 // type result = Product<ProductTypes.Stock>;
@@ -36,17 +37,17 @@ describe("isIProduct<AnyProduct>", () => {
             type: type
         };
 
-        const correctTypedProperties: {stock: bigint | string} | {order: {minimum: bigint | string, current: bigint | string}} = type === ProductTypes.Stock ? { stock: 100n } : { order: { minimum: 100n, current: 100n } };
-        const nonMatchingTypedProperties: {stock: bigint | string} | {order: {minimum: bigint | string, current: bigint | string}} = type === ProductTypes.Order ? { stock: 100n } : { order: { minimum: 100n, current: 100n } };
+        const correctProductTypedProperties: {stock: IQuantity} | {order: {minimum: IQuantity, current: IQuantity}} = type === ProductTypes.Stock ? { stock: 100n } : { order: { minimum: 100n, current: 100n } };
+        const nonMatchingProductTypedProperties: {stock: IQuantity} | {order: {minimum: IQuantity, current: IQuantity}} = type === ProductTypes.Order ? { stock: 100n } : { order: { minimum: 100n, current: 100n } };
         
-        const incorrectTypedProperties_BadType = type === ProductTypes.Stock ?  { stock: false } : { order: { minimum: false, current: 100n } };
-        const incorrectTypedProperties_ExtraProp = type === ProductTypes.Stock ? { stock: { extra: 'property' } } : { order: { minimum: 100n, current: 100n, extra: 'property' } };
-        const incorrectTypedProperties_MissingProp = type === ProductTypes.Stock ? {  } : { order: { minimum: 100n } };
+        const incorrectProductTypedProperties_BadType = type === ProductTypes.Stock ?  { stock: false } : { order: { minimum: false, current: 100n } };
+        const incorrectProductTypedProperties_ExtraProp = type === ProductTypes.Stock ? { stock: { extra: 'property' } } : { order: { minimum: 100n, current: 100n, extra: 'property' } };
+        const incorrectProductTypedProperties_MissingProp = type === ProductTypes.Stock ? {  } : { order: { minimum: 100n } };
 
         it(`should return true if everything is valid`, () => {
             const product = {
                 ...correctProductBase,
-                ...correctTypedProperties
+                ...correctProductTypedProperties
             };
             // console.log(product);
             expect(isIProduct(product)).toBe(true);
@@ -55,7 +56,7 @@ describe("isIProduct<AnyProduct>", () => {
         it(`should return false if ProductBase is missing required property`, () => {
             let product: any = {
                 ...correctProductBase,
-                ...correctTypedProperties
+                ...correctProductTypedProperties
             };
             delete product.id;
             expect(isIProduct(product)).toBe(false);
@@ -64,7 +65,7 @@ describe("isIProduct<AnyProduct>", () => {
         it(`should return false if ProductBase has an extra property`, () => {
             const product = {
                 ...correctProductBase,
-                ...correctTypedProperties,
+                ...correctProductTypedProperties,
                 extra: 'property'
             };
             expect(isIProduct(product)).toBe(false);
@@ -73,43 +74,43 @@ describe("isIProduct<AnyProduct>", () => {
         it(`should return false if ProductBase has an incorrect property`, () => {
             const product = {
                 ...correctProductBase,
-                ...correctTypedProperties,
+                ...correctProductTypedProperties,
                 id: false
             };
             expect(isIProduct(product)).toBe(false);
         });
 
-        it(`should return false if no TypedProperties is provided`, () => {
+        it(`should return false if no ProductTypedProperties is provided`, () => {
             const product = {
                 ...correctProductBase,
             };
             expect(isIProduct(product)).toBe(false);
         });
 
-        it(`should return false if TypedProperties does not match type specified by product`, () => {
+        it(`should return false if ProductTypedProperties does not match type specified by product`, () => {
             const product = {
                 ...correctProductBase,
-                ...nonMatchingTypedProperties
+                ...nonMatchingProductTypedProperties
             };
             expect(isIProduct(product)).toBe(false);
         });
 
-        it(`should return false if TypedProperties is not structurally valid`, () => {
+        it(`should return false if ProductTypedProperties is not structurally valid`, () => {
             const product_BadType = {
                 ...correctProductBase,
-                ...incorrectTypedProperties_BadType
+                ...incorrectProductTypedProperties_BadType
             };
             expect(isIProduct(product_BadType)).toBe(false);
 
             const product_ExtraProp = {
                 ...correctProductBase,
-                ...incorrectTypedProperties_ExtraProp
+                ...incorrectProductTypedProperties_ExtraProp
             };
             expect(isIProduct(product_ExtraProp)).toBe(false);
 
             const product_MissingProp = {
                 ...correctProductBase,
-                ...incorrectTypedProperties_MissingProp
+                ...incorrectProductTypedProperties_MissingProp
             };
             expect(isIProduct(product_MissingProp)).toBe(false);
         });
@@ -180,7 +181,7 @@ describe("isIProduct<T extends ProductTypes>", () => {
         };
         expect(isIProduct(productOrder, ProductTypes.Order)).toBe(false);
     });
-    it(`should return false if no TypedProperties is provided`, () => {
+    it(`should return false if no ProductTypedProperties is provided`, () => {
         let productStock: any = {
             ...correctStockProduct,
         };
@@ -193,7 +194,7 @@ describe("isIProduct<T extends ProductTypes>", () => {
         delete productOrder.order;
         expect(isIProduct(productOrder, ProductTypes.Order)).toBe(false);
     });
-    it(`should return false if TypedProperties does not match type specified by product`, () => {
+    it(`should return false if ProductTypedProperties does not match type specified by product`, () => {
         const productStock = {
             ...correctStockProduct,
             type: ProductTypes.Order,
@@ -205,7 +206,7 @@ describe("isIProduct<T extends ProductTypes>", () => {
         };
         expect(isIProduct(productOrder, ProductTypes.Order)).toBe(false);
     });
-    it(`should return false if TypedProperties is not structurally valid`, () => {
+    it(`should return false if ProductTypedProperties is not structurally valid`, () => {
         const productStock = {
             ...correctStockProduct,
             stock: false
@@ -217,7 +218,7 @@ describe("isIProduct<T extends ProductTypes>", () => {
         };
         expect(isIProduct(productOrder, ProductTypes.Order)).toBe(false);
     });
-    it(`should return false if TypedProperties is missing a required property`, () => {
+    it(`should return false if ProductTypedProperties is missing a required property`, () => {
         let productStock: any = {
             ...correctStockProduct,
         };
