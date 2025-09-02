@@ -1,5 +1,4 @@
-import { IPreOrder, IPreOrderForm, IPreOrderDocument, isIPreOrder, isIPreOrderForm, PreOrderStatus } from "./preorders";
-
+import { IPreOrder, IPreOrderForm, IPreOrderDocument, isIPreOrder, isIPreOrderForm, PreOrderStatus } from './preorders';
 
 describe('isIPreOrder', () => {
     it('should return true for a valid IPreOrder object', () => {

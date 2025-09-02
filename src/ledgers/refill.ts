@@ -22,10 +22,10 @@ export interface IRefill {
   account: string;
   method: RefillMethods;
   reference: string;
-  amount: bigint | string; // PHYC amount
-  cost: bigint | string; // Amount to charge user
-  dateCreated: Date | string;
-  dateUpdated: Date | string;
+  amount: bigint; // PHYC amount
+  cost: bigint; // Amount to charge user
+  dateCreated: Date;
+  dateUpdated: Date;
   status: RefillStatus;
   note?: string;
 }

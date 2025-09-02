@@ -1,7 +1,8 @@
 import { Document } from 'mongoose';
 import typia, { tags } from "typia";
 import { keys } from 'ts-transformer-keys';
-import { ICartItem } from './cart';
+import { ICartItem } from '../cart';
+import { ICoin } from '../common';
 
 export enum TransactionType {
     Debit = 'debit',
@@ -19,11 +20,11 @@ export interface ITransactionItem {
 export interface ITransaction {
     date: Date | string;
     id: string;
-    accountid: string;
+    accountId: string;
     type: TransactionType;
     reason: string;
     products: ITransactionItem[];
-    total: bigint | string;
+    total: ICoin
 }
 
 export type ITransactionForm = Omit<ITransaction, 'id' | 'date' | 'total'> & {
