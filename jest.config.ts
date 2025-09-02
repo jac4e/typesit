@@ -9,7 +9,7 @@ const config: Config = {
   testMatch: ['**/*.test.ts'],
   transform: {
     '^.+\\.tsx?$': ['ts-jest', {
-      tsConfig: 'tsconfig.json',
+      tsconfig: 'tsconfig.json',
     }]
   },
   collectCoverageFrom: [
