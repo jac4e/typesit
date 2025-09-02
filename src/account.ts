@@ -25,7 +25,7 @@ export enum Roles {
     /** Verified club member account - standard access */  
     Member = 'member',
     /** Verified non-member account - limited access */
-    NonMember = 'nonmember',
+    NonMember = 'nonMember',
     /** Admin account - full system access */
     Admin = 'admin'
 }

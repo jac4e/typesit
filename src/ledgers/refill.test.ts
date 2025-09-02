@@ -38,8 +38,8 @@ describe('Refill Module', () => {
     it('should have correct method values', () => {
       expect(RefillMethods.Cash).toBe('cash');
       expect(RefillMethods.Etransfer).toBe('etransfer');
-      expect(RefillMethods.CreditCard).toBe('creditcard');
-      expect(RefillMethods.DebitCard).toBe('debitcard');
+      expect(RefillMethods.CreditCard).toBe('creditCard');
+      expect(RefillMethods.DebitCard).toBe('debitCard');
       expect(RefillMethods.Stripe).toBe('stripe');
     });
 
@@ -47,8 +47,8 @@ describe('Refill Module', () => {
       const methods = Object.values(RefillMethods);
       expect(methods).toContain('cash');
       expect(methods).toContain('etransfer');
-      expect(methods).toContain('creditcard');
-      expect(methods).toContain('debitcard');
+      expect(methods).toContain('creditCard');
+      expect(methods).toContain('debitCard');
       expect(methods).toContain('stripe');
       expect(methods).toHaveLength(5);
     });

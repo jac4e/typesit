@@ -25,9 +25,9 @@ export enum RefillMethods {
   /** Electronic transfer (e-transfer) payment */
   Etransfer = "etransfer",
   /** Credit card payment */
-  CreditCard = "creditcard",
+  CreditCard = "creditCard",
   /** Debit card payment */
-  DebitCard = "debitcard",
+  DebitCard = "debitCard",
   /** Stripe payment processing platform */
   Stripe = "stripe"
 }

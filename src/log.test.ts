@@ -100,8 +100,8 @@ describe('Log Module', () => {
       };
 
       expect(log.data).toEqual(complexData);
-      expect((log.data as any).user.preferences.theme).toBe('dark');
-      expect((log.data as any).items).toHaveLength(2);
+      expect((log.data as typeof complexData).user.preferences.theme).toBe('dark');
+      expect((log.data as typeof complexData).items).toHaveLength(2);
     });
 
     it('should handle different date formats', () => {
@@ -163,11 +163,19 @@ describe('Log Module', () => {
         },
       };
 
-      expect((log.data as any).stringValue).toBe('test');
-      expect((log.data as any).numberValue).toBe(42);
-      expect((log.data as any).booleanValue).toBe(true);
-      expect((log.data as any).nullValue).toBeNull();
-      expect((log.data as any).undefinedValue).toBeUndefined();
+      const logData = log.data as {
+        stringValue: string;
+        numberValue: number;
+        booleanValue: boolean;
+        nullValue: null;
+        undefinedValue: undefined;
+      };
+      
+      expect(logData.stringValue).toBe('test');
+      expect(logData.numberValue).toBe(42);
+      expect(logData.booleanValue).toBe(true);
+      expect(logData.nullValue).toBeNull();
+      expect(logData.undefinedValue).toBeUndefined();
     });
 
     it('should handle arrays in data object', () => {
@@ -183,12 +191,20 @@ describe('Log Module', () => {
         },
       };
 
-      expect(Array.isArray((log.data as any).emptyArray)).toBe(true);
-      expect((log.data as any).emptyArray).toHaveLength(0);
-      expect((log.data as any).numberArray).toHaveLength(5);
-      expect((log.data as any).stringArray[1]).toBe('b');
-      expect((log.data as any).mixedArray[2]).toBe(true);
-      expect((log.data as any).nestedArray[0][1]).toBe(2);
+      const logData = log.data as {
+        emptyArray: never[];
+        numberArray: number[];
+        stringArray: string[];
+        mixedArray: (number | string | boolean | null)[];
+        nestedArray: number[][];
+      };
+
+      expect(Array.isArray(logData.emptyArray)).toBe(true);
+      expect(logData.emptyArray).toHaveLength(0);
+      expect(logData.numberArray).toHaveLength(5);
+      expect(logData.stringArray[1]).toBe('b');
+      expect(logData.mixedArray[2]).toBe(true);
+      expect(logData.nestedArray[0][1]).toBe(2);
     });
 
     it('should handle functions in data object (if allowed by object type)', () => {
@@ -203,8 +219,13 @@ describe('Log Module', () => {
         },
       };
 
-      expect((log.data as any).regularProperty).toBe('value');
-      expect(typeof (log.data as any).method).toBe('function');
+      const logData = log.data as {
+        regularProperty: string;
+        method: () => string;
+      };
+
+      expect(logData.regularProperty).toBe('value');
+      expect(typeof logData.method).toBe('function');
     });
 
     it('should maintain object reference integrity', () => {
@@ -218,8 +239,13 @@ describe('Log Module', () => {
         },
       };
 
-      expect((log.data as any).ref1).toBe((log.data as any).ref2);
-      expect((log.data as any).ref1.shared).toBe('value');
+      const logData = log.data as {
+        ref1: typeof sharedObject;
+        ref2: typeof sharedObject;
+      };
+
+      expect(logData.ref1).toBe(logData.ref2);
+      expect(logData.ref1.shared).toBe('value');
     });
   });
 

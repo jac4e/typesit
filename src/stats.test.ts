@@ -201,12 +201,12 @@ describe('Stats Module', () => {
       const stats: IAccountStats = {
         unverified: 10,
         member: 100,
-        nonmember: 20,
+        nonMember: 20,
         admin: 3,
         total: 133,
       };
 
-      const calculatedTotal = stats.unverified + stats.member + stats.nonmember + stats.admin;
+      const calculatedTotal = stats.unverified + stats.member + stats.nonMember + stats.admin;
       expect(calculatedTotal).toBe(stats.total);
     });
 
@@ -214,13 +214,13 @@ describe('Stats Module', () => {
       const realisticStats: IAccountStats = {
         unverified: 50,  // New signups
         member: 800,     // Main user base
-        nonmember: 100,  // Occasional users
+        nonMember: 100,  // Occasional users
         admin: 5,        // Small admin team
         total: 955,
       };
 
       expect(realisticStats.member).toBeGreaterThan(realisticStats.unverified);
-      expect(realisticStats.member).toBeGreaterThan(realisticStats.nonmember);
+      expect(realisticStats.member).toBeGreaterThan(realisticStats.nonMember);
       expect(realisticStats.admin).toBeLessThan(realisticStats.member);
     });
   });

@@ -27,7 +27,7 @@ describe('Index Module Utilities', () => {
     });
 
     it('should return empty array for empty object', () => {
-      const keys = getKeys({} as any);
+      const keys = getKeys({} as Record<string, never>);
       expect(keys).toEqual([]);
     });
   });
@@ -53,7 +53,7 @@ describe('Index Module Utilities', () => {
     });
 
     it('should return empty array for empty object', () => {
-      const values = getValues({} as any);
+      const values = getValues({} as Record<string, never>);
       expect(values).toEqual([]);
     });
   });
@@ -82,9 +82,29 @@ describe('Index Module Utilities', () => {
       );
     });
 
-    it('should handle empty object gracefully', () => {
-      const objects = getObject({} as any);
-      expect(objects).toEqual([]);
+    it('should handle minimal object properly', () => {
+      // Create a minimal account object
+      const minimalAccount: IAccount = {
+        id: '',
+        username: '',
+        firstName: '',
+        lastName: '',
+        email: '',
+        role: Roles.Unverified,
+        balance: 0n,
+        notify: false
+      };
+      
+      const objects = getObject(minimalAccount);
+      expect(objects).toHaveLength(9); // Should have 9 key-value pairs (including gid)
+      expect(objects).toEqual(
+        expect.arrayContaining([
+          expect.objectContaining({ key: 'id', value: '' }),
+          expect.objectContaining({ key: 'username', value: '' }),
+          expect.objectContaining({ key: 'balance', value: 0n }),
+          expect.objectContaining({ key: 'notify', value: false })
+        ])
+      );
     });
   });
 

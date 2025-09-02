@@ -63,7 +63,7 @@ describe('Account Types and Validation', () => {
     it('should have correct role values', () => {
       expect(Roles.Unverified).toBe('unverified');
       expect(Roles.Member).toBe('member');
-      expect(Roles.NonMember).toBe('nonmember');
+      expect(Roles.NonMember).toBe('nonMember');
       expect(Roles.Admin).toBe('admin');
     });
   });
