@@ -11,6 +11,7 @@ const config: Config = {
   transform: {
     '^.+\\.tsx?$': ['ts-jest', {
       tsconfig: 'tsconfig.json',
+      useESM: true
     }]
   },
   collectCoverageFrom: [
@@ -20,12 +21,7 @@ const config: Config = {
     '!**/node_modules/**',
     '!**/vendor/**',
   ],
-  extensionsToTreatAsEsm: ['.ts'],
-  globals: {
-    'ts-jest': {
-      useESM: true
-    }
-  }
+  extensionsToTreatAsEsm: ['.ts']
 };
 
 export default config;
