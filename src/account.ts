@@ -100,15 +100,30 @@ export interface IAccountPasswordForm {
 }
 
 // Type guards for runtime validation using typia
-/** Validates if an object conforms to IAccount interface */
+/** 
+ * Validates if an object conforms to IAccount interface
+ * @function
+ */
 export const isIAccount = typia.createEquals<IAccount>();
-/** Validates if an object conforms to IAccountBaseForm interface */
+/** 
+ * Validates if an object conforms to IAccountBaseForm interface 
+ * @function
+ */
 export const isIAccountBaseForm = typia.createEquals<IAccountBaseForm>();
-/** Validates if an object conforms to IAccountSettingsForm interface */
+/** 
+ * Validates if an object conforms to IAccountSettingsForm interface 
+ * @function
+ */
 export const isIAccountSettingsForm = typia.createEquals<IAccountSettingsForm>();
-/** Validates if an object conforms to IAccountPasswordForm interface */
+/** 
+ * Validates if an object conforms to IAccountPasswordForm interface 
+ * @function
+ */
 export const isIAccountPasswordForm = typia.createEquals<IAccountPasswordForm>();
-/** Validates if an object conforms to ICredentials interface */
+/** 
+ * Validates if an object conforms to ICredentials interface 
+ * @function
+ */
 export const isICredentials = typia.createEquals<ICredentials>();
 
 /** Array of IAccount keys in interface definition order */

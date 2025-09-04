@@ -94,9 +94,15 @@ export interface IRefillForm {
 }
 
 // Type guards for runtime validation using typia
-/** Validates if an object conforms to IRefill interface */
+/** 
+ * Validates if an object conforms to IRefill interface 
+ * @function
+ */
 export const isIRefill = typia.createEquals<IRefill>();
-/** Validates if an object conforms to IRefillForm interface */
+/** 
+ * Validates if an object conforms to IRefillForm interface 
+ * @function
+ */
 export const isIRefillForm = typia.createEquals<IRefillForm>();
 
 /** Array of IRefill keys in interface definition order */

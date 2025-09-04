@@ -67,7 +67,7 @@ export type UnionKeysValues<Type> = Type extends Type ? {key: UnionKeys<Type>, v
 /**
  * Returns an array of object keys in the order they are defined in the interface.
  * This function provides type-safe key extraction that maintains the original 
- * interface definition order, which is crucial for serialization consistency.
+ * interface definition order, which is crucial for enumeration consistency.
  * 
  * @template Type The type of the object to extract keys from
  * @param obj The object to extract keys from

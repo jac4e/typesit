@@ -7,7 +7,7 @@
  * - Full cart collections with validation
  * - Type guards for runtime validation
  * 
- * @author Jacques Fourie
+ * @author The Engineering Physics Team
  */
 
 import { ICoin } from "./common";
@@ -49,9 +49,18 @@ export type ICart = ICartItem[];
 export type ICartSerialized = ICartItemSerialized[];
 
 // Type guards for runtime validation using typia
-/** Validates if an object conforms to ICartItem interface */
-export const isICartItem = typia.createEquals<ICartItem>();
-/** Validates if an object conforms to ICart interface (array of ICartItem) */
-export const isICart = typia.createEquals<ICart>();
-/** Validates if an object conforms to ICartSerialized interface */
-export const isICartSerialized = typia.createEquals<ICartSerialized>();
+/**
+ * Validates if an object conforms to ICartItem interface.
+ * @function
+ */
+export const isICartItem: (input: unknown) => input is ICartItem = typia.createEquals<ICartItem>();
+/**
+ * Validates if an object conforms to ICart interface (array of ICartItem).
+ * @function
+ */
+export const isICart: (input: unknown) => input is ICart = typia.createEquals<ICart>();
+/**
+ * Validates if an object conforms to ICartSerialized interface.
+ * @function
+ */
+export const isICartSerialized: (input: unknown) => input is ICartSerialized = typia.createEquals<ICartSerialized>();

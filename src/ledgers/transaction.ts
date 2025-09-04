@@ -88,9 +88,15 @@ export type ITransactionDocument = Omit<ITransaction, 'id' | 'total'> & {
 };
 
 // Type guards for runtime validation using typia
-/** Validates if an object conforms to ITransaction interface */
+/** 
+ * Validates if an object conforms to ITransaction interface
+ * @function
+ */
 export const isITransaction = typia.createEquals<ITransaction>();
-/** Validates if an object conforms to ITransactionForm interface */
+/** 
+ * Validates if an object conforms to ITransactionForm interface
+ * @function
+ */
 export const isITransactionForm = typia.createEquals<ITransactionForm>();
 
 /** Array of ITransaction keys in interface definition order */
