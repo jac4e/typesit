@@ -1,83 +1,57 @@
-import { IPreOrder, IPreOrderForm, IPreOrderDocument, isIPreOrder, isIPreOrderForm, PreOrderStatus } from './preorders';
+import { IPreOrder, IPreOrderForm, isIPreOrder, isIPreOrderForm, PreOrderStatus } from './preorders';
+import { LedgerType } from './ledgers';
 
-describe('isIPreOrder', () => {
-    it('should return true for a valid IPreOrder object', () => {
-        const preOrder: IPreOrder = {
-        date: new Date('2023-01-01'),
-        lastUpdated: new Date('2023-01-02'),
-        id: 'preorder-1',
-        accountId: 'account-1',
-        productId: 'product-1',
-        amount: 10n,
-        status: PreOrderStatus.Ordered,
-        };
-        expect(isIPreOrder(preOrder)).toBe(true);
-    });
-    it('should return false for an incorrect IPreOrder property', () => {
-        const preOrder = {
-        date: new Date(),
-        lastUpdated: new Date(),
-        id: '123',
-        accountId: '123',
-        amount: 100n,
-        status: false,
-        };
-        expect(isIPreOrder(preOrder)).toBe(false);
-    });
-    it('should return false when containing an extra property', () => {
-        const preOrder = {
-        date: new Date(),
-        lastUpdated: new Date(),
-        id: '123',
-        accountId: '123',
-        amount: 100n,
-        status: PreOrderStatus.Ordered,
-        extra: 'property',
-        };
-        expect(isIPreOrder(preOrder)).toBe(false);
-    });
-    it('should return false when missing a required property', () => {
-        const preOrder = {
-        id: '123',
-        accountId: '123',
-        amount: 100n,
-        };
-        expect(isIPreOrder(preOrder)).toBe(false);
-    });
+describe('IPreOrder', () => {
+  const createdAt = new Date('2024-04-01T10:00:00.000Z');
+  const updatedAt = new Date('2024-04-01T12:00:00.000Z');
+
+  const VALID_PREORDER: IPreOrder = {
+    id: 'preorder-1',
+    type: LedgerType.PreOrder,
+    createdAt,
+    updatedAt,
+    accountId: 'account-1',
+    productId: 'product-1',
+    amount: 10n,
+    status: PreOrderStatus.Ordered,
+  };
+
+  it('accepts a full preorder ledger entry', () => {
+    expect(isIPreOrder(VALID_PREORDER)).toBe(true);
+  });
+
+  it('rejects payloads missing base ledger metadata', () => {
+    const missingLedgerType = { ...VALID_PREORDER, type: LedgerType.Refill };
+    const missingCreatedAt = { ...VALID_PREORDER, createdAt: undefined } as unknown;
+
+    expect(isIPreOrder(missingLedgerType)).toBe(false);
+    expect(isIPreOrder(missingCreatedAt)).toBe(false);
+  });
+
+  it('rejects invalid preorder specific properties', () => {
+    const invalidStatus = { ...VALID_PREORDER, status: 'unknown' } as unknown;
+    const invalidAmount = { ...VALID_PREORDER, amount: '5' } as unknown;
+
+    expect(isIPreOrder(invalidStatus)).toBe(false);
+    expect(isIPreOrder(invalidAmount)).toBe(false);
+  });
 });
 
-describe('isIPreOrderForm', () => {
-    it('should return true for a valid IPreOrderForm object', () => {
-        const preOrderForm: IPreOrderForm = {
-        accountId: 'account-1',
-        productId: 'product-1',
-        amount: 10n,
-        status: PreOrderStatus.Ordered,
-        };
-        expect(isIPreOrderForm(preOrderForm)).toBe(true);
-    });
-    it('should return false for an incorrect IPreOrderForm property', () => {
-        const preOrderForm = {
-        accountId: '123',
-        amount: 100n,
-        status: false,
-        };
-        expect(isIPreOrderForm(preOrderForm)).toBe(false);
-    });
-    it('should return false when containing an extra property', () => {
-        const preOrderForm = {
-        accountId: '123',
-        amount: 100n,
-        status: PreOrderStatus.Ordered,
-        extra: 'property',
-        };
-        expect(isIPreOrderForm(preOrderForm)).toBe(false);
-    });
-    it('should return false when missing a required property', () => {
-        const preOrderForm = {
-        accountId: '123',
-        amount: 100n,
-        };
-        expect(isIPreOrderForm(preOrderForm)).toBe(false);
-    });
+describe('IPreOrderForm', () => {
+  const VALID_FORM: IPreOrderForm = {
+    type: LedgerType.PreOrder,
+    accountId: 'account-1',
+    productId: 'product-1',
+    amount: 10n,
+    status: PreOrderStatus.Ordered,
+  };
+
+  it('accepts preorder form payloads without ledger metadata', () => {
+    expect(isIPreOrderForm(VALID_FORM)).toBe(true);
+  });
+
+  it('rejects forms that include ledger fields', () => {
+    const withCreatedAt = { ...VALID_FORM, createdAt: new Date() } as unknown;
+    expect(isIPreOrderForm(withCreatedAt)).toBe(false);
+  });
 });
