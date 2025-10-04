@@ -12,7 +12,7 @@
 
 import { keys } from 'ts-transformer-keys';
 import typia, { tags } from "typia";
-import { Document } from 'mongoose';
+import { Document, HydratedDocument, Model } from 'mongoose';
 import { ICoin } from './common';
 
 /**
@@ -66,15 +66,39 @@ export interface ICredentials {
 }
 
 /**
- * MongoDB document type for account storage.
- * Extends IAccount with database-specific fields and excludes client-only properties.
+ * Represents the schema for an account as stored in the database.
+ * Omits the 'id' and 'balance' properties from IAccount, since 'id' is provided by the database,
+ * and adds 'hash' and 'sessionid' fields for authentication/session management.
+ *
+ * @remarks
+ * This type is used for persisting accounts in the database, where the database generates the unique identifier.
+ *
+ * @property {string} hash - The hashed password for the account.
+ * @property {string} sessionid - The session identifier associated with the account.
  */
-export type IAccountDocument = Omit<IAccount, 'id' | 'balance'> & Document & {
-    /** Password hash for authentication */
+export type IAccountSchema = Omit<IAccount, 'id' | 'balance'> & {
     hash: string;
-    /** Current session identifier */
     sessionid: string;
 };
+
+/**
+ * MongoDB document type for account storage.
+ * Extends IAccountSchema with database-specific fields and excludes client-only properties.
+ * 
+ * @see IAccountSchema
+ */
+export type IAccountDocument = HydratedDocument<IAccountSchema>;
+
+/**
+ * Mongoose model type for the Account schema.
+ * 
+ * Provides static and instance methods for interacting with account documents in the database.
+ * Used for querying, creating, updating, and deleting account records.
+ * 
+ * @see IAccountSchema
+ * @see IAccountDocument
+ */
+export type IAccountModel = Model<IAccountSchema>;
 
 /**
  * Form data for creating a new account.
