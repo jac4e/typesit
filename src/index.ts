@@ -11,7 +11,8 @@
  * - Background task management
  * 
  * @author Jacques Fourie
- * @version 0.1.0
+ * @version 1.0.0
+ * @license AGPL-3.0
  */
 
 import { keys } from 'ts-transformer-keys';
@@ -21,6 +22,7 @@ import { isITransaction, ITransaction, keysITransaction } from './ledgers/transa
 import { IPreOrder, isIPreOrder, keysIPreOrder } from './ledgers/preorders.js';
 import { IStockEntry, isIStockEntry, keysIStockEntry } from './ledgers/stock.js';
 import { isIRefill, keysIRefill } from './ledgers/refill.js';
+import { isILedger } from './ledgers/ledgers.js';
 
 export * from './account.js';
 // export { IAccount, ICredentials, IAccountDocument, IAccountForm, Roles, isIAccount, isIAccountForm, isICredentials } from './account.js';
@@ -36,6 +38,7 @@ export * from './ledgers/stock.js';
 export * from './ledgers/transaction.js';
 export { ITransaction, TransactionType, ITransactionForm, ITransactionItem, ITransactionDocument, isITransaction, isITransactionForm } from './ledgers/transaction.js';
 export * from './ledgers/refill.js';
+export * from './ledgers/ledgers.js';
 export * from './stats.js';
 export * from './task.js';
 
@@ -131,11 +134,14 @@ export function getValues<Type>(obj: Type) {
         ] as (UnionValues<Type>)[];
     } else if (isITransaction(obj)) {
         return [
-            obj.date,
+            obj.id,
+            obj.type,
+            obj.createdAt,
+            obj.updatedAt,
+            obj.description,
             obj.id,
             obj.accountId,
             obj.type,
-            obj.reason,
             obj.products,
             obj.total
         ] as (UnionValues<Type>)[];
@@ -152,24 +158,33 @@ export function getValues<Type>(obj: Type) {
         ] as (UnionValues<Type>)[];
     } else if (isIPreOrder(obj)) {
         return [
-            obj.date,
-            obj.lastUpdated,
             obj.id,
+            obj.type,
+            obj.createdAt,
+            obj.updatedAt,
+            obj.description,
             obj.accountId,
             obj.productId,
             obj.amount,
             obj.status,
         ] as (UnionValues<Type>)[];
     } else if (isIStockEntry(obj)) {
-        return [
+        const values: unknown[] = [
             obj.id,
-            obj.date,
-            obj.productId,
-            obj.cost,
+            obj.createdAt,
+            obj.updatedAt,
             obj.type,
+            obj.description,
+            obj.entryType,
+            obj.productId,
             obj.delta,
-            obj.notes,
-        ] as (UnionValues<Type>)[];
+        ];
+
+        if ('cost' in obj) {
+            values.push(obj.cost);
+        }
+
+        return values as (UnionValues<Type>)[];
     } else if (isIRefill(obj)) {
         return [
             obj.id,
@@ -178,10 +193,9 @@ export function getValues<Type>(obj: Type) {
             obj.reference,
             obj.amount,
             obj.cost,
-            obj.dateCreated,
-            obj.dateUpdated,
+            obj.createdAt,
+            obj.updatedAt,
             obj.status,
-            obj.note
         ] as (UnionValues<Type>)[];
     } else {
         return [];

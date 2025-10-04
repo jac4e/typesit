@@ -21,6 +21,46 @@ import { IStockEntry, IStockEntryDocument, IStockEntryForm } from "./stock";
 import { ITransaction, ITransactionDocument, ITransactionForm } from "./transaction";
 
 /**
+ * Enumeration of all supported ledger entry types.
+ * 
+ * Used for type discrimination and categorization of ledger entries.
+ * Each enum value corresponds to a specific ledger operation type.
+ */
+export enum LedgerType {
+    Refill = "refill",
+    PreOrder = "preOrder",
+    Stock = "stock",
+    Transaction = "transaction"
+}
+
+/**
+ * Base interface defining common properties shared by all ledger entries.
+ * 
+ * This interface establishes the fundamental structure that all ledger
+ * entry types must implement, ensuring consistency across the system.
+ * 
+ * @example
+ * ```typescript
+ * interface CustomLedgerEntry extends BaseLedgerEntry {
+ *   type: LedgerType.CUSTOM;
+ *   customField: string;
+ * }
+ * ```
+ */
+export interface BaseLedgerEntry {
+    /** Unique identifier for the ledger entry */
+    id: string;
+    /** Timestamp when the entry was created */
+    createdAt: Date;
+    /** Timestamp when the entry was last updated */
+    updatedAt: Date;
+    /** Type discriminator for the ledger entry */
+    type: LedgerType;
+    /** Optional description or notes for the entry */
+    description?: string;
+}
+
+/**
  * Union type representing all possible ledger entry types.
  * 
  * This type combines all ledger entry interfaces into a single discriminated union,

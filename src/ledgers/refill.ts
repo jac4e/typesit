@@ -14,6 +14,7 @@
 import { Document } from 'mongoose';
 import { keys } from 'ts-transformer-keys';
 import typia, { tags } from "typia";
+import { BaseLedgerEntry, LedgerType } from "./ledgers";
 
 /**
  * Enumeration of supported payment methods for account refills.
@@ -51,9 +52,9 @@ export enum RefillStatus {
  * Complete refill record representing a processed or in-progress refill operation.
  * Contains all information needed to track refill requests through their lifecycle.
  */
-export interface IRefill {
-  /** Unique refill identifier */
-  id: string;
+export interface IRefill extends BaseLedgerEntry {
+  /** Ledger discriminator for refills */
+  type: LedgerType.Refill;
   /** Account ID that will receive the refill credit */
   account: string;
   /** Payment method used for this refill */
@@ -64,14 +65,8 @@ export interface IRefill {
   amount: bigint; // PHYC amount
   /** Total cost charged to user including processing fees (in smallest currency unit) */
   cost: bigint; // Amount to charge user
-  /** Timestamp when refill request was created */
-  dateCreated: Date;
-  /** Timestamp when refill status was last updated */
-  dateUpdated: Date;
   /** Current processing status of the refill */
   status: RefillStatus;
-  /** Optional notes about the refill (error messages, admin comments, etc.) */
-  note?: string;
 }
 
 /**

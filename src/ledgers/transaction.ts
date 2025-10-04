@@ -19,6 +19,7 @@ import typia, { tags } from "typia";
 import { keys } from 'ts-transformer-keys';
 import { ICartItem } from '../cart';
 import { ICoin } from '../common';
+import { BaseLedgerEntry, LedgerType } from './ledgers';
 
 /**
  * Enumeration of transaction types for financial record keeping.
@@ -52,17 +53,13 @@ export interface ITransactionItem {
  * Complete transaction record representing a financial operation.
  * Contains all information needed for accounting, auditing, and reporting.
  */
-export interface ITransaction {
-    /** Timestamp when the transaction occurred */
-    date: Date | string;
-    /** Unique transaction identifier */
-    id: string;
+export interface ITransaction extends BaseLedgerEntry {
+    /** Ledger discriminator for financial transactions */
+    type: LedgerType.Transaction;
     /** Account ID that this transaction affects */
     accountId: string;
     /** Type of transaction (debit or credit) */
-    type: TransactionType;
-    /** Human-readable description of the transaction purpose */
-    reason: string;
+    transactionType: TransactionType;
     /** Array of items/services included in this transaction */
     products: ITransactionItem[];
     /** Total transaction amount in smallest currency unit */
@@ -73,7 +70,7 @@ export interface ITransaction {
  * Form data for creating a new transaction.
  * Excludes system-generated fields like ID and timestamp.
  */
-export type ITransactionForm = Omit<ITransaction, 'id' | 'date' | 'total'> & {
+export type ITransactionForm = Omit<ITransaction, 'id' | 'createdAt' | 'updatedAt' | 'total'> & {
     /** Total amount as string for form input validation */
     total: string;
 };

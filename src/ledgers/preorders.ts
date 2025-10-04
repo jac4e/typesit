@@ -20,6 +20,7 @@ import typia, { tags } from "typia";
 import { IAccount } from "../account";
 import { IProduct } from "../product";
 import { ICoin } from "../common";
+import { BaseLedgerEntry, LedgerType } from "./ledgers";
 
 /**
  * Enumeration of all possible pre-order status values.
@@ -58,8 +59,8 @@ export enum PreOrderStatus {
 /**
  * Complete pre-order record interface containing all tracking information.
  * 
- * This interface represents a full pre-order entry in the system, including
- * timestamps, customer information, product details, and order status. Pre-orders
+ * This interface represents a full pre-order entry in the system, extending
+ * the base ledger functionality with pre-order specific fields. Pre-orders
  * allow customers to reserve products that require minimum order quantities from
  * suppliers before they can be fulfilled.
  * 
@@ -71,6 +72,7 @@ export enum PreOrderStatus {
  *   date: new Date('2023-06-01'),
  *   lastUpdated: new Date('2023-06-02'),
  *   id: 'preorder_12345',
+ *   type: LedgerType.PreOrder,
  *   accountId: 'acc_67890',
  *   productId: 'prod_abc123',
  *   amount: 25n, // 25 items
@@ -83,15 +85,9 @@ export enum PreOrderStatus {
  * }
  * ```
  */
-export interface IPreOrder {
-    /** Date when the pre-order was initially created */
-    date: Date | string;
-    
-    /** Date when the pre-order was last modified */
-    lastUpdated: Date | string;
-    
-    /** Unique identifier for this pre-order */
-    id: string;
+export interface IPreOrder extends BaseLedgerEntry {
+    /** Ledger type identifier for pre-orders */
+    type: LedgerType.PreOrder;
     
     /** ID of the customer account that placed this pre-order */
     accountId: IAccount['id'];
@@ -100,7 +96,7 @@ export interface IPreOrder {
     productId: IProduct['id'];
     
     /** Quantity of items being pre-ordered (in smallest unit) */
-    amount: ICoin
+    amount: ICoin;
     
     /** Current status of the pre-order in its lifecycle */
     status: PreOrderStatus;
@@ -109,7 +105,7 @@ export interface IPreOrder {
 /**
  * Form interface for creating new pre-orders.
  * 
- * This type omits system-generated fields (id, date, lastUpdated) from the full
+ * This type omits system-generated fields (id, createdAt, updatedAt) from the full
  * IPreOrder interface, leaving only the fields that users need to provide when
  * creating a new pre-order. Used in forms and API endpoints for order creation.
  * 
@@ -129,12 +125,12 @@ export interface IPreOrder {
  * const fullOrder: IPreOrder = {
  *   ...orderForm,
  *   id: generateId(),
- *   date: new Date(),
- *   lastUpdated: new Date()
+ *   createdAt: new Date(),
+ *   updatedAt: new Date()
  * };
  * ```
  */
-export type IPreOrderForm = Omit<IPreOrder, 'id' | 'date' | 'lastUpdated'>;
+export type IPreOrderForm = Omit<IPreOrder, 'id' | 'createdAt' | 'updatedAt'>;
 
 /**
  * Database document interface for MongoDB storage.

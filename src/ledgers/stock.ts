@@ -47,6 +47,7 @@ import typia from "typia";
 import { keys } from 'ts-transformer-keys';
 import { Model, Schema, Document } from 'mongoose';
 import { ICoin, IQuantity } from '../common';
+import { BaseLedgerEntry, LedgerType } from './ledgers';
 
 /**
  * Enumeration of all possible stock entry types.
@@ -103,20 +104,16 @@ export enum StockEntryType {
  * 
  * @private
  */
-type StockEntryBase = {
-    /** Unique identifier for the stock entry */
-    id: string;
-    /** Date when the stock change occurred */
-    date: Date | string;
+type StockEntryBase = BaseLedgerEntry & {
+    /** Ledger discriminator for stock movement entries */
+    type: LedgerType.Stock;
+    /** Categorisation of the stock entry */
+    entryType: StockEntryType;
     /** Reference to the product that was affected */
     productId: IProduct['id'];
-    /** Type of stock entry - determines additional required properties */
-    type: StockEntryType;
     /** Change in stock quantity (positive for increase, negative for decrease) */
     delta: IQuantity;
-    /** Optional notes explaining the stock change */
-    notes?: string;
-}
+};
 
 /**
  * Type-specific properties that vary based on the stock entry type.
@@ -132,14 +129,14 @@ type StockTypedProperties = {
     [StockEntryType.Purchase]: {
         /** Cost per unit at time of purchase */
         cost: ICoin;
-    }
+    };
     /** Shrinkage entries have no additional properties */
-    [StockEntryType.Shrinkage]: {}
+    [StockEntryType.Shrinkage]: Record<never, never>;
     /** Overage entries have no additional properties */
-    [StockEntryType.Overage]: {}
+    [StockEntryType.Overage]: Record<never, never>;
     /** Sale entries have no additional properties */
-    [StockEntryType.Sale]: {}
-}
+    [StockEntryType.Sale]: Record<never, never>;
+};
 
 /**
  * Flexible stock entry type that includes all base properties and optionally any type-specific properties.
@@ -154,7 +151,7 @@ type StockTypedProperties = {
  * const processEntry = (entry: AnyStockEntry) => {
  *   console.log(`Processing entry: ${entry.id}`);
  *   
- *   if (entry.type === StockEntryType.Purchase && entry.cost !== undefined) {
+ *   if (entry.entryType === StockEntryType.Purchase && entry.cost !== undefined) {
  *     console.log(`Purchase cost: ${entry.cost}`);
  *   }
  * };
@@ -206,7 +203,7 @@ type AnyStockEntry = StockEntryBase & Partial<StockTypedProperties[StockEntryTyp
  * };
  * ```
  */
-export type IStockEntry<T = AnyStockEntry> = T extends StockEntryType ? Omit<StockEntryBase, 'type'> & {type: T} & StockTypedProperties[T] : AnyStockEntry;
+export type IStockEntry<T = AnyStockEntry> = T extends StockEntryType ? Omit<StockEntryBase, 'entryType'> & {entryType: T} & StockTypedProperties[T] : AnyStockEntry;
 
 // *********************************
 // * Stock Entry Form Interfaces *
@@ -221,7 +218,7 @@ export type IStockEntry<T = AnyStockEntry> = T extends StockEntryType ? Omit<Sto
  * 
  * @private
  */
-type StockEntryBaseForm = Omit<StockEntryBase, 'id' | 'date'>;
+type StockEntryBaseForm = Omit<StockEntryBase, 'id' | 'createdAt' | 'updatedAt' | 'type'>;
 
 /**
  * Type-specific properties for stock entry forms.
@@ -280,7 +277,7 @@ type AnyStockEntryForm = StockEntryBaseForm & Partial<StockTypedPropertiesForm[S
  * };
  * ```
  */
-export type IStockEntryForm<T = AnyStockEntryForm> = T extends StockEntryType ? Omit<StockEntryBaseForm, 'type'> & {type: T} & StockTypedPropertiesForm[T] : AnyStockEntryForm;
+export type IStockEntryForm<T = AnyStockEntryForm> = T extends StockEntryType ? Omit<StockEntryBaseForm, 'entryType'> & {entryType: T} & StockTypedPropertiesForm[T] : AnyStockEntryForm;
 
 // ************************************
 // * Stock Entry Document Types *
@@ -310,14 +307,14 @@ export type StockTypedPropertiesDocument = {
     [StockEntryType.Purchase]: {
         /** Cost per unit (stored as string for precision) */
         cost: string;
-    }
+    };
     /** Shrinkage entries have no additional document properties */
-    [StockEntryType.Shrinkage]: {}
+    [StockEntryType.Shrinkage]: Record<never, never>;
     /** Overage entries have no additional document properties */
-    [StockEntryType.Overage]: {}
+    [StockEntryType.Overage]: Record<never, never>;
     /** Sale entries have no additional document properties */
-    [StockEntryType.Sale]: {}
-}
+    [StockEntryType.Sale]: Record<never, never>;
+};
 
 /**
  * Flexible document type that includes all base properties and optionally any type-specific properties.
@@ -343,7 +340,9 @@ type AnyStockEntryDocument = Omit<IStockEntryDocumentBase, 'delta'> & Document &
  * @template T The stock entry type or AnyStockEntry if not specified
  * @private
  */
-type StockEntryDocument<T = AnyStockEntry> = T extends StockEntryType ? Omit<IStockEntryDocumentBase, 'type' | 'delta'> & {type: T} & {delta: string} & StockTypedPropertiesDocument[T] : AnyStockEntryDocument;
+type StockEntryDocument<T = AnyStockEntry> = T extends StockEntryType
+    ? Omit<IStockEntryDocumentBase, 'entryType' | 'delta'> & { entryType: T } & { delta: string } & StockTypedPropertiesDocument[T]
+    : AnyStockEntryDocument;
 
 /**
  * MongoDB document interface for stock entries with Mongoose integration.
@@ -361,7 +360,7 @@ type StockEntryDocument<T = AnyStockEntry> = T extends StockEntryType ? Omit<ISt
  * const findPurchaseEntries = async (productId: string): Promise<IStockEntryDocument<StockEntryType.Purchase>[]> => {
  *   return StockEntryModel.find({ 
  *     productId, 
- *     type: StockEntryType.Purchase 
+ *     entryType: StockEntryType.Purchase 
  *   });
  * };
  * 
@@ -430,7 +429,7 @@ export function isIStockEntry<T extends StockEntryType | AnyStockEntry = AnyStoc
     if (type === undefined) {
         // For stock entries, only Purchase type has additional properties
         // If it's a Purchase type, it must have the cost property
-        if (entry.type === StockEntryType.Purchase) {
+        if (entry.entryType === StockEntryType.Purchase) {
             return typia.equals<StockTypedProperties[StockEntryType.Purchase]>({ cost: entry.cost });
         }
         // For other types, no additional properties are required
@@ -491,7 +490,7 @@ export function isIStockEntryForm<T extends StockEntryType | AnyStockEntryForm =
     // if type is not specified, we are checking if the AnyStockEntryForm is valid
     if (type === undefined) {
         // For stock entries, only Purchase type has additional properties
-        if (entry.type === StockEntryType.Purchase) {
+        if (entry.entryType === StockEntryType.Purchase) {
             return typia.equals<StockTypedPropertiesForm[StockEntryType.Purchase]>({ cost: entry.cost });
         }
         return true;
@@ -552,7 +551,7 @@ export function isIStockEntryDocument<T extends StockEntryType | AnyStockEntryDo
     // if type is not specified, we are checking if the AnyStockEntryDocument is valid
     if (type === undefined) {
         // For stock entries, only Purchase type has additional properties
-        if (entry.type === StockEntryType.Purchase) {
+        if (entry.entryType === StockEntryType.Purchase) {
             return typia.equals<StockTypedPropertiesDocument[StockEntryType.Purchase]>({ cost: entry.cost });
         }
         return true;
