@@ -31,6 +31,29 @@ export enum Roles {
 }
 
 /**
+ * Enumeration of account form types for different update operations.
+ * Used to distinguish between settings updates and password changes.
+ * @remarks
+ * This enum helps in routing form submissions to the appropriate handlers.
+ * @see IAccountSettingsForm
+ * @see IAccountPasswordForm
+ * @example
+ * // Example usage:
+ * function handleAccountUpdate(type: AccountFormTypes, formData: IAccountSettingsForm | IAccountPasswordForm) {
+ *  if (type === AccountFormTypes.Settings) {
+ *   // Handle settings update
+ *  } else if (type === AccountFormTypes.Password) {
+ *  // Handle password change
+ * }
+ * }
+ * 
+ */
+export enum AccountFormTypes {
+    Settings = 'settings',
+    Password = 'password'
+}
+
+/**
  * Core account interface representing a user account in the system.
  * Contains all essential user information and account state.
  */
