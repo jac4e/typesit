@@ -1,0 +1,17 @@
+// typedoc.json
+{
+    "plugin": [
+        "typedoc-plugin-markdown",
+        "typedoc-umlclass",
+    ],
+    "outputs": [
+        {
+            "name": "html",
+            "path": "./doc_html"
+        },
+        {
+            "name": "markdown",
+            "path": "./doc_md"
+        }
+    ]
+}
