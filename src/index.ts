@@ -16,11 +16,11 @@
  */
 
 import { keys } from 'ts-transformer-keys';
-import { IAccount, isIAccount, keysIAccount } from './account.js';
-import { IProduct, ProductTypes, isIProduct, keysIProduct, keysIProductOrder, keysIProductStock } from './product.js';
-import { isITransaction, ITransaction, keysITransaction } from './ledgers/transaction.js';
-import { IPreOrder, isIPreOrder, keysIPreOrder } from './ledgers/preorders.js';
-import { IStockEntry, isIStockEntry, keysIStockEntry } from './ledgers/stock.js';
+import { IAccount, IAccountDocument, isIAccount, keysIAccount } from './account.js';
+import { IProduct, IProductDocument, ProductTypes, isIProduct, keysIProduct, keysIProductOrder, keysIProductStock } from './product.js';
+import { isITransaction, ITransaction, ITransactionDocument, keysITransaction } from './ledgers/transaction.js';
+import { IPreOrder, IPreOrderDocument, isIPreOrder, keysIPreOrder } from './ledgers/preorders.js';
+import { IStockEntry, IStockEntryDocument, isIStockEntry, keysIStockEntry } from './ledgers/stock.js';
 import { isIRefill, keysIRefill } from './ledgers/refill.js';
 import { isILedger } from './ledgers/ledgers.js';
 
@@ -46,6 +46,19 @@ export * from './task.js';
  * Union type of all available object types that can be processed by utility functions
  */
 type AvailableTypes = IAccount | ITransaction | IProduct | IProduct<ProductTypes.Stock> | IProduct<ProductTypes.Order> | IPreOrder | IStockEntry;
+
+/**
+ * Type that converts given interface types to their corresponding Mongoose document types
+ * @template Type The interface type to convert
+ */
+export type MongooseDocumentType<Type> = Type extends IAccount ? IAccountDocument :
+    Type extends ITransaction ? ITransactionDocument :
+    Type extends IProduct ? IProductDocument :
+    Type extends IProduct<ProductTypes.Stock> ? IProductDocument<ProductTypes.Stock> :
+    Type extends IProduct<ProductTypes.Order> ? IProductDocument<ProductTypes.Order> :
+    Type extends IPreOrder ? IPreOrderDocument :
+    Type extends IStockEntry ? IStockEntryDocument :
+    never;
 
 /**
  * Extracts all possible keys from a union type as a union of key types
