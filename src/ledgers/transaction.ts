@@ -79,7 +79,7 @@ export type ITransactionForm = Omit<ITransaction, 'id' | 'createdAt' | 'updatedA
  * MongoDB document type for transaction storage.
  * Stores transaction total as string for precise decimal handling in database.
  */
-export type ITransactionDocument = Omit<ITransaction, 'id' | 'total'> & {
+export type ITransactionDocument = Omit<ITransaction, 'id' | 'total'> & Document & {
     /** Total amount stored as string in database */
     total: string;
 };

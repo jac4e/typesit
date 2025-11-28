@@ -57,7 +57,10 @@ describe('Index Module Utilities', () => {
         name: 'Soda Can',
         price: 200n,
         type: ProductTypes.Stock,
-        stock: 120n,
+        stock: {
+          amount: 150n,
+          cost: 100n,
+        },
       };
 
       const orderKeys = getKeys(orderProduct);
@@ -148,7 +151,10 @@ describe('Index Module Utilities', () => {
         name: 'Mug',
         price: 1500n,
         type: ProductTypes.Stock,
-        stock: 75n,
+        stock: {
+          amount: 75n,
+          cost: 800n,
+        },
       };
 
       const orderValues = getValues(orderProduct);

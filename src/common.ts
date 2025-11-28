@@ -8,6 +8,16 @@
  * @author Jacques Fourie
  */
 
+import { ProductTypes } from "./product";
+import { IAccountBaseForm, IAccount } from "./account";
+import { ITransactionForm } from "./ledgers/transaction";
+import { ITransaction } from "./ledgers/transaction";
+import { IProductForm } from "./product";
+import { IPreOrderForm } from "./ledgers/preorders";
+import { IPreOrder } from "./ledgers/preorders";
+import { IStockEntryForm } from "./ledgers/stock";
+import { IStockEntry } from "./ledgers/stock";
+import { ITaskLean } from "./task";
 import { IProduct, ProductTypedPropertiesDocument } from "./product";
 
 /**
@@ -58,7 +68,58 @@ export type IQuantity = bigint;
  * };
  * ```
  */
-// HTTP<T> type should replace all bigint types on the T interface with BigIntHTTP and all Date types with DateHTTP
-export type HTTP<T> = {
-    [K in keyof T]: T[K] extends bigint ? string : T[K] extends Date ? string : T[K] extends (bigint | undefined) ? (string | undefined) :  T[K] extends Omit<ProductTypedPropertiesDocument["order"],"current"> | undefined ? HTTP<Omit<ProductTypedPropertiesDocument["order"],"current">> | undefined : T[K];
-};
+export type HTTP<T> = T extends Array<infer U> ? U extends object ? {
+    [K in keyof T]: innerHttp<T[K]>;
+} : Array<innerHttp<U>> : T extends object ? {
+    [K in keyof T]: innerHttp<T[K]>;
+} : innerHttp<T>;
+type innerHttp<T> = T extends bigint ? string : T extends Date ? string : T extends (bigint | undefined) ? (string | undefined) : T extends Omit<ProductTypedPropertiesDocument["order"], "current"> | undefined ? HTTP<Omit<ProductTypedPropertiesDocument["order"], "current">> | undefined : T;
+
+/**
+ * Type guard to check if a value matches the HTTP format (strings and nested objects).
+ * @param value The value to check
+ * @returns True if the value matches the HTTP format
+ */
+export function isHTTP<T>(value: unknown): value is HTTP<T> {
+    if (!value || typeof value !== 'object') return false;
+    
+    return Object.entries(value as object).every(([_, val]) => {
+        if (val === undefined) return true;
+        if (typeof val === 'string') return true;
+        if (Array.isArray(val)) return val.every(item => isHTTP(item));
+        if (typeof val === 'object') return isHTTP(val);
+        return false;
+    });
+}
+
+/**
+ * Transforms an interface for HTML input elements by converting BigInt and Date types
+ * to appropriate HTML input types.
+ * 
+ * @template T The interface type to transform for HTML inputs
+ * 
+ * @example
+ * ```typescript
+ * interface MyData {
+ *   id: string;
+ *   amount: bigint;
+ *   createdAt: Date;
+ * }
+ * 
+ * const htmlInputs: HTML<MyData> = {
+ *   id: "text",
+ *   amount: "number",
+ *   createdAt: "datetime-local"
+ * };
+ * ```
+ */
+export type HTML<T> = T extends Array<infer U> ? U extends object ? {
+    [K in keyof T]: innerHtml<T[K]>;
+} : Array<innerHtml<U>> : T extends object ? {
+    [K in keyof T]: innerHtml<T[K]>;
+} : innerHtml<T>;
+
+type innerHtml<T> = T extends bigint ? "number"
+    : T extends number ? "number"
+    : T extends (bigint | undefined) ? "number" 
+    : T;

@@ -156,8 +156,13 @@ type ProductTypedProperties = {
     current: IQuantity;
   }
   
-  /** Stock product properties - just the current stock level */
-  [ProductTypes.Stock]: IQuantity;
+  /** Stock product properties */
+  [ProductTypes.Stock]: {
+    /** Current stock level (unlimited if -1) */
+    amount: IQuantity,
+    /** Average cost of goods sold */
+    cost: ICoin
+  };
 }
 
 /**
@@ -249,7 +254,6 @@ type ProductBaseForm = Omit<ProductBase, 'id'>;
 // Special typed properties that does not contain generated properties, used for creating new products
 type ProductTypedPropertiesForm = {
   [ProductTypes.Order]: Omit<ProductTypedProperties[ProductTypes.Order], 'current'>;
-  [ProductTypes.Stock]: ProductTypedProperties[ProductTypes.Stock];
 }
 
 type AnyProductForm = ProductBaseForm & Partial<ProductTypedPropertiesForm>;
@@ -289,7 +293,7 @@ type AnyProductForm = ProductBaseForm & Partial<ProductTypedPropertiesForm>;
  * };
  * ```
  */
-export type IProductForm<T = AnyProduct> = T extends ProductTypes ? Omit<ProductBaseForm, 'type'> & {type: T} & { [key in T]: ProductTypedPropertiesForm[T] } : AnyProductForm;
+export type IProductForm<T = AnyProduct> = T extends keyof ProductTypedPropertiesForm ? Omit<ProductBaseForm, 'type'> & {type: T} & { [key in T]: ProductTypedPropertiesForm[T] } : AnyProductForm;
 
 
 // Alternative approach to IProductForm ?? simpler but less flexible
@@ -318,7 +322,7 @@ export type IProductForm<T = AnyProduct> = T extends ProductTypes ? Omit<Product
  * 
  * @private
  */
-type IProductDocumentBase = Omit<IProduct, 'id'>;
+type IProductDocumentBase = Omit<ProductBase, 'id'> & Document;
 
 /**
  * Type-specific properties for product documents in database storage format.
@@ -337,8 +341,6 @@ export type ProductTypedPropertiesDocument = {
     /** Current pre-order quantity (stored as string) */
     current: string;
   }
-  /** Stock quantity for stock products (stored as string) */
-  [ProductTypes.Stock]: string;
 }
 
 /**
@@ -361,7 +363,7 @@ type AnyProductDocument = IProductDocumentBase & Partial<ProductTypedPropertiesD
  * @template T The product type or AnyProductDocument if not specified
  * @private
  */
-type ProductDocument<T = AnyProduct> = T extends ProductTypes ? Omit<IProductDocumentBase, 'type'> & {type: T} & { [key in T]: ProductTypedPropertiesDocument[T] } : AnyProductDocument;
+type ProductDocument<T = AnyProduct> = T extends keyof ProductTypedPropertiesDocument ? Omit<IProductDocumentBase, 'type'> & {type: T} & { [key in T]: ProductTypedPropertiesDocument[T] } : AnyProductDocument;
 
 /**
  * MongoDB document interface for products with Mongoose integration.
@@ -504,29 +506,24 @@ export function isIProductForm<T extends ProductTypes | AnyProductForm = AnyProd
   if (!typia.equals<AnyProductForm>(product)) return false;
 
   // if type is not specified, we are checking if the AnyProduct is valid
-  if (type === undefined){
-    // If we are testing for AnyProduct, we need to confirm that only one of the typed properties is present, and that it is correctly defined
-    // This is to ensure that the AnyProduct is actually a valid typed product
-    // Although AnyProduct has all typed properties as optional, to be functionally correct, it should have only one typed property
+  if (type === undefined) {
+    // For AnyProductForm, we only need to validate the base properties
+    // Since both stock and order forms don't have any direct required typed properties
+    // (stock property is removed and order properties are optional)
+    
+    // Check that the type is valid
+    if (!Object.values(ProductTypes).includes(product.type)) {
+      return false;
+    }
 
-    // Check if only one typed property is present
-    const hasOneTypedProperty =  Object.keys(product).filter(key => keys<ProductTypedPropertiesForm>().includes(key as keyof ProductTypedPropertiesForm)).length === 1;
+    // If it's an order type, validate order properties if present
+    if (product.type === ProductTypes.Order && product.order) {
+      return typia.equals<ProductTypedPropertiesForm[ProductTypes.Order]>(product.order);
+    }
 
-    if (!hasOneTypedProperty) return false;
-
-    // Check that the typed property key is valid
-    const typedPropertyKey = Object.keys(product).find(key => keys<ProductTypedPropertiesForm>().includes(key as keyof ProductTypedPropertiesForm)) as keyof ProductTypedPropertiesForm;
-
-    // check if the typed property matches the products specified type
-    const productTypeMatches = product.type === typedPropertyKey;
-
-    if (!productTypeMatches) return false;
-
-    // Do not use T or type here, as this logic is for verifying AnyProduct, not IProduct<T extends ProductTypes>
-    const isTypedPropertyCorrect = typia.equals<ProductTypedPropertiesForm[keyof ProductTypedPropertiesForm]>(product[typedPropertyKey]);
-
-    // Return the results of isTypedPropertyCorrect if type is not specified (aka testing for any product)
-    return isTypedPropertyCorrect;
+    // For stock type or order type without order properties, just return true
+    // as all other validations are handled by the AnyProductForm check above
+    return true;
   }
 
   if (type === ProductTypes.Order) return typia.equals<IProductForm<ProductTypes.Order>>(product);
@@ -661,3 +658,18 @@ export const keysIProductStock = [...keys<ProductBase>(), ProductTypes.Stock] as
  * ```
  */
 export const keysIProductOrder = [...keys<ProductBase>(), ProductTypes.Order] as (keyof IProduct<ProductTypes.Order>)[];
+
+/**
+ * Utility array containing all keys of the IProductForm interface.
+ */
+export const keysIProductForm = keys<IProductForm>();
+
+/**
+ * Utility array containing all keys specific to stock product forms.
+ */
+export const keysIProductFormStock = keys<ProductBaseForm>() as (keyof IProductForm<ProductTypes.Stock>)[];
+
+/**
+ * Utility array containing all keys specific to order product forms.
+ */
+export const keysIProductFormOrder = [...keys<ProductBaseForm>(), ProductTypes.Order] as (keyof IProductForm<ProductTypes.Order>)[];

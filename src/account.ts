@@ -175,3 +175,9 @@ export const isICredentials = typia.createEquals<ICredentials>();
 
 /** Array of IAccount keys in interface definition order */
 export const keysIAccount = keys<IAccount>();
+
+/** Array of IAccountBaseForm keys in interface definition order */
+export const keysIAccountBaseForm = keys<IAccountBaseForm>();
+
+/** Array of IAccountSettingsForm keys in interface definition order */
+export const keysIAccountSettingsForm = keys<IAccountSettingsForm>();

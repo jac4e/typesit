@@ -23,7 +23,10 @@ describe('Cart Module', () => {
     image: 'drink.jpg',
     price: 250n, // $2.50 in cents
     type: ProductTypes.Stock,
-    stock: 100n,
+    stock: {
+      amount: 100n,
+      cost: 150n, // $1.50 in cents
+    },
     amount: 2n,
     total: 500n, // price * amount
   };
@@ -239,7 +242,10 @@ describe('Cart Module', () => {
       const stockCartItem: ICartItem = {
         ...VALID_CART_ITEM,
         type: ProductTypes.Stock,
-        stock: 50n,
+        stock: {
+          amount: 50n,
+          cost: 150n,
+        }
       };
 
       const orderCartItem: ICartItem = {
@@ -285,7 +291,10 @@ describe('Cart Module', () => {
         name: 'Minimal Product',
         price: 100n,
         type: ProductTypes.Stock,
-        stock: 1n,
+        stock: {
+          amount: 10n,
+          cost: 50n,
+        },
         amount: 1n,
         total: 100n,
       };

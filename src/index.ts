@@ -16,11 +16,11 @@
  */
 
 import { keys } from 'ts-transformer-keys';
-import { IAccount, IAccountDocument, isIAccount, keysIAccount } from './account.js';
-import { IProduct, IProductDocument, ProductTypes, isIProduct, keysIProduct, keysIProductOrder, keysIProductStock } from './product.js';
-import { isITransaction, ITransaction, ITransactionDocument, keysITransaction } from './ledgers/transaction.js';
-import { IPreOrder, IPreOrderDocument, isIPreOrder, keysIPreOrder } from './ledgers/preorders.js';
-import { IStockEntry, IStockEntryDocument, isIStockEntry, keysIStockEntry } from './ledgers/stock.js';
+import { IAccount, IAccountBaseForm, IAccountDocument, isIAccount, keysIAccount } from './account.js';
+import { IProduct, IProductDocument, IProductForm, ProductTypes, isIProduct, keysIProduct, keysIProductOrder, keysIProductStock } from './product.js';
+import { isITransaction, ITransaction, ITransactionDocument, ITransactionForm, keysITransaction } from './ledgers/transaction.js';
+import { IPreOrder, IPreOrderDocument, IPreOrderForm, isIPreOrder, keysIPreOrder } from './ledgers/preorders.js';
+import { IStockEntry, IStockEntryDocument, IStockEntryForm, isIStockEntry, keysIStockEntry } from './ledgers/stock.js';
 import { isIRefill, keysIRefill } from './ledgers/refill.js';
 import { isILedger } from './ledgers/ledgers.js';
 
@@ -28,6 +28,8 @@ export * from './account.js';
 // export { IAccount, ICredentials, IAccountDocument, IAccountForm, Roles, isIAccount, isIAccountForm, isICredentials } from './account.js';
 export * from './cart.js';
 // export { ICartItem, ICartItemSerialized, ICart, ICartSerialized, isICartItem, isICart, isICartSerialized } from './cart.js';
+export * from './common.js';
+// export { ICoin, IQuantity, HTTP } from './common.js';
 export * from './log.js';
 export * from './product.js';
 // export { IProduct, ProductCategories, ProductTypes, isIProduct } from './product.js';
@@ -45,7 +47,7 @@ export * from './task.js';
 /**
  * Union type of all available object types that can be processed by utility functions
  */
-type AvailableTypes = IAccount | ITransaction | IProduct | IProduct<ProductTypes.Stock> | IProduct<ProductTypes.Order> | IPreOrder | IStockEntry;
+export type AvailableTypes = IAccount | ITransaction | IProduct | IProduct<ProductTypes.Stock> | IProduct<ProductTypes.Order> | IPreOrder | IStockEntry;
 
 /**
  * Type that converts given interface types to their corresponding Mongoose document types
@@ -59,6 +61,12 @@ export type MongooseDocumentType<Type> = Type extends IAccount ? IAccountDocumen
     Type extends IPreOrder ? IPreOrderDocument :
     Type extends IStockEntry ? IStockEntryDocument :
     never;
+
+/**
+ * Type to transform ITypes to their corresponding ITypeForm types.
+ * 
+ */
+export type FormType<T> = T extends IAccount ? IAccountBaseForm : T extends ITransaction ? ITransactionForm : T extends IProduct ? IProductForm : T extends IProduct<ProductTypes.Stock> ? IProductForm<ProductTypes.Stock> : T extends IProduct<ProductTypes.Order> ? IProductForm<ProductTypes.Order> : T extends IPreOrder ? IPreOrderForm : T extends IStockEntry ? IStockEntryForm : never;
 
 /**
  * Extracts all possible keys from a union type as a union of key types
