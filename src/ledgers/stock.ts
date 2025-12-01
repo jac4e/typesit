@@ -291,7 +291,7 @@ export type IStockEntryForm<T = AnyStockEntryForm> = T extends StockEntryType ? 
  * 
  * @private
  */
-type IStockEntryDocumentBase = Omit<IStockEntry, 'id'>;
+type IStockEntryDocumentBase = Omit<StockEntryBase, 'id'>;
 
 /**
  * Type-specific properties for stock entry documents in database storage format.
