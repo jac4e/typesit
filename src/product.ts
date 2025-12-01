@@ -338,8 +338,8 @@ export type ProductTypedPropertiesDocument = {
   [ProductTypes.Order]: {
     /** Minimum quantity required (stored as string) */
     minimum: string;
-    /** Current pre-order quantity (stored as string) */
-    current: string;
+    /** Supplier name */
+    supplier: string;
   }
 }
 
