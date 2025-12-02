@@ -76,20 +76,30 @@ export type HTTP<T> = T extends Array<infer U> ? U extends object ? {
 type innerHttp<T> = T extends bigint ? string : T extends Date ? string : T extends (bigint | undefined) ? (string | undefined) : T extends Omit<ProductTypedPropertiesDocument["order"], "current"> | undefined ? HTTP<Omit<ProductTypedPropertiesDocument["order"], "current">> | undefined : T;
 
 /**
- * Type guard to check if a value matches the HTTP format (strings and nested objects).
+ * Type guard to check if a value matches the HTTP format (strings, numbers, booleans and nested objects/arrays).
  * @param value The value to check
  * @returns True if the value matches the HTTP format
  */
 export function isHTTP<T>(value: unknown): value is HTTP<T> {
-    if (!value || typeof value !== 'object') return false;
-    
-    return Object.entries(value as object).every(([_, val]) => {
-        if (val === undefined) return true;
-        if (typeof val === 'string') return true;
-        if (Array.isArray(val)) return val.every(item => isHTTP(item));
-        if (typeof val === 'object') return isHTTP(val);
-        return false;
-    });
+    return isHTTPValue(value);
+}
+
+function isHTTPValue(value: unknown): boolean {
+    // undefined is allowed (optional fields)
+    if (value === undefined) return true;
+    if (value === null) return false;
+
+    const t = typeof value;
+    // primitives allowed in HTTP<T>: string (serialized bigint/date), boolean, number
+    if (t === "string" || t === "boolean" || t === "number") return true;
+
+    if (Array.isArray(value)) return value.every(isHTTPValue);
+
+    if (t === "object") {
+        return Object.values(value as object).every(isHTTPValue);
+    }
+
+    return false;
 }
 
 /**
