@@ -68,12 +68,34 @@ export type IQuantity = bigint;
  * };
  * ```
  */
-export type HTTP<T> = T extends Array<infer U> ? U extends object ? {
-    [K in keyof T]: innerHttp<T[K]>;
-} : Array<innerHttp<U>> : T extends object ? {
-    [K in keyof T]: innerHttp<T[K]>;
-} : innerHttp<T>;
-type innerHttp<T> = T extends bigint ? string : T extends Date ? string : T extends (bigint | undefined) ? (string | undefined) : T extends Omit<ProductTypedPropertiesDocument["order"], "current"> | undefined ? HTTP<Omit<ProductTypedPropertiesDocument["order"], "current">> | undefined : T;
+export type HTTP<T> =
+  T extends Array<infer U>
+    ? HTTPArray<U>
+    : HTTPInner<T>;
+
+type HTTPArray<T> =
+  T extends object
+    ? Array<{ [K in keyof T]: HTTPInner<T[K]> }>
+    : Array<HTTPInner<T>>;
+
+type HTTPInner<T> =
+  // BigInt: becomes string
+  T extends bigint ? string
+  // Date variants
+  : T extends Date ? string
+  // Primitives
+  : T extends string | number | boolean | symbol | null | undefined ? T
+  // Functions are not transformed
+  : T extends (...args: any) => any ? T
+  // Arrays
+  : T extends Array<infer U>
+    ? HTTPArray<U>
+  // Plain objects: recurse on properties
+  : T extends object
+      ? { [K in keyof T]: HTTPInner<T[K]> }
+  // Fallback
+  : T;
+
 
 /**
  * Type guard to check if a value matches the HTTP format (strings, numbers, booleans and nested objects/arrays).
