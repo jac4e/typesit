@@ -27,7 +27,9 @@ export enum Roles {
     /** Verified non-member account - limited access */
     NonMember = 'nonMember',
     /** Admin account - full system access */
-    Admin = 'admin'
+    Admin = 'admin',
+    /** POS account - limited system access with additional verification utilities */
+    POS = 'pos'
 }
 
 /**

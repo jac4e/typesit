@@ -187,14 +187,16 @@ describe('Stats Module', () => {
         [Roles.Member]: 150,
         [Roles.NonMember]: 30,
         [Roles.Admin]: 5,
-        total: 210,
+        [Roles.POS]: 3,
+        total: 213,
       };
 
       expect(accountStats[Roles.Unverified]).toBe(25);
       expect(accountStats[Roles.Member]).toBe(150);
       expect(accountStats[Roles.NonMember]).toBe(30);
       expect(accountStats[Roles.Admin]).toBe(5);
-      expect(accountStats.total).toBe(210);
+      expect(accountStats[Roles.POS]).toBe(3);
+      expect(accountStats.total).toBe(213);
     });
 
     it('should maintain total consistency', () => {
@@ -203,10 +205,11 @@ describe('Stats Module', () => {
         member: 100,
         nonMember: 20,
         admin: 3,
-        total: 133,
+        pos: 2,
+        total: 135,
       };
 
-      const calculatedTotal = stats.unverified + stats.member + stats.nonMember + stats.admin;
+      const calculatedTotal = stats.unverified + stats.member + stats.nonMember + stats.admin + stats.pos;
       expect(calculatedTotal).toBe(stats.total);
     });
 
@@ -216,7 +219,8 @@ describe('Stats Module', () => {
         member: 800,     // Main user base
         nonMember: 100,  // Occasional users
         admin: 5,        // Small admin team
-        total: 955,
+        pos: 3,          // POS terminals
+        total: 958,
       };
 
       expect(realisticStats.member).toBeGreaterThan(realisticStats.unverified);

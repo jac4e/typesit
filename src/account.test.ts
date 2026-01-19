@@ -65,6 +65,7 @@ describe('Account Types and Validation', () => {
       expect(Roles.Member).toBe('member');
       expect(Roles.NonMember).toBe('nonMember');
       expect(Roles.Admin).toBe('admin');
+      expect(Roles.POS).toBe('pos');
     });
   });
 
