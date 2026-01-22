@@ -1,19 +1,22 @@
 {
   "name": "typesit",
-  "version": "0.0.8",
+  "version": "1.0.0",
   "type": "module",
   "description": "Types for spendit and serveit",
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
   "scripts": {
     "build": "npx tsc",
+    "watch": "npx tsc -w",
     "test": "npx jest",
-    "prepare": "ts-patch install && typia patch && npm run build"
+    "prepare": "ts-patch install && typia patch && npm run build",
+  "schemas": "npm run build && node lib/generate-schemas.js",
+    "docs": "typedoc --options ./typedoc.json"
   },
   "author": "",
-  "license": "MIT",
+  "license": "AGPL-3.0-only",
   "dependencies": {
-    "mongoose": "^6.6.5",
+    "@types/mongoose": "^8.19.0",
     "ts-transformer-keys": "^0.4.3",
     "typia": "^5.5.4"
   },
@@ -26,6 +29,10 @@
     "ts-jest": "^29.1.0",
     "ts-node": "^10.9.2",
     "ts-patch": "^3.1.2",
+    "typedoc": "^0.28.12",
+    "typedoc-plugin-inline-sources": "^1.3.0",
+    "typedoc-plugin-markdown": "^4.8.1",
+    "typedoc-umlclass": "^0.10.2",
     "typescript": "^5.3.2"
   }
 }

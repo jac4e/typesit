@@ -5,18 +5,23 @@ const config: Config = {
   testEnvironment: 'node',
   moduleNameMapper: {
     '^@/(.*)$': '<rootDir>/src/$1',
+    '^(\\.{1,2}/.*)\\.js$': '$1',
   },
-  testMatch: ['**/*.test.ts'],
+  testMatch: ['<rootDir>/src/**/*.test.ts'],
   transform: {
     '^.+\\.tsx?$': ['ts-jest', {
-      tsConfig: 'tsconfig.json',
+      tsconfig: 'tsconfig.json',
+      useESM: true
     }]
   },
   collectCoverageFrom: [
-    '**/*.{ts,tsx}',
+    'src/**/*.{ts,tsx}',
+    '!src/**/*.test.ts',
+    '!src/**/*.d.ts',
     '!**/node_modules/**',
     '!**/vendor/**',
   ],
+  extensionsToTreatAsEsm: ['.ts']
 };
 
 export default config;

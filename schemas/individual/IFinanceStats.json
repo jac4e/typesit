@@ -1,0 +1,939 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "typeit/IFinanceStats",
+  "type": "object",
+  "properties": {
+    "totalCredit": {
+      "type": "number",
+      "description": "Total credit/money loaded into the system by users",
+      "x-typia-required": true,
+      "x-typia-optional": false
+    },
+    "revenue": {
+      "type": "number",
+      "description": "Total revenue generated from sales",
+      "x-typia-required": true,
+      "x-typia-optional": false
+    },
+    "creditBalance": {
+      "type": "number",
+      "description": "Current credit balance held by all users combined",
+      "x-typia-required": true,
+      "x-typia-optional": false
+    },
+    "costOfGoodsSold": {
+      "type": "number",
+      "description": "Total cost of goods sold during the period",
+      "x-typia-required": true,
+      "x-typia-optional": false
+    },
+    "profit": {
+      "type": "number",
+      "description": "Net profit (revenue - cost of goods sold)",
+      "x-typia-required": true,
+      "x-typia-optional": false
+    }
+  },
+  "nullable": false,
+  "required": [
+    "totalCredit",
+    "revenue",
+    "creditBalance",
+    "costOfGoodsSold",
+    "profit"
+  ],
+  "x-typia-jsDocTags": [],
+  "title": "IFinanceStats",
+  "components": {
+    "schemas": {
+      "Roles": {
+        "type": "string",
+        "enum": [
+          "unverified",
+          "member",
+          "nonMember",
+          "admin",
+          "pos"
+        ],
+        "description": "Enumeration of user roles with different permission levels.\nRoles determine what actions a user can perform in the system."
+      },
+      "ProductCategories": {
+        "type": "string",
+        "enum": [
+          "food",
+          "drinks",
+          "clothing",
+          "merch",
+          "other"
+        ],
+        "description": "Enumeration of product categories for organizational purposes.\n\nCategories help organize products into logical groups for easier browsing,\ninventory management, and reporting. Each product must belong to exactly\none category.",
+        "x-typia-jsDocTags": [
+          {
+            "name": "enum",
+            "text": [
+              {
+                "text": "*",
+                "kind": "text"
+              }
+            ]
+          },
+          {
+            "name": "example",
+            "text": [
+              {
+                "text": "```typescript\nconst product: IProduct = {\n  // ...other properties\n  category: ProductCategories.Food,\n};\n\n// Filtering products by category\nconst foodProducts = products.filter(p => p.category === ProductCategories.Food);\n```",
+                "kind": "text"
+              }
+            ]
+          }
+        ]
+      },
+      "ProductTypes": {
+        "type": "string",
+        "enum": [
+          "stock",
+          "order"
+        ],
+        "description": "Enumeration defining the two fundamental product management strategies.\n\nThis enum determines how a product is handled in the inventory and ordering system.\nThe choice affects which additional properties are required and how the product\nlifecycle is managed.",
+        "x-typia-jsDocTags": [
+          {
+            "name": "enum",
+            "text": [
+              {
+                "text": "*",
+                "kind": "text"
+              }
+            ]
+          },
+          {
+            "name": "example",
+            "text": [
+              {
+                "text": "```typescript\n// Stock product - kept in inventory\nconst energyDrink: IProduct<ProductTypes.Stock> = {\n  type: ProductTypes.Stock,\n  stock: 150n, // 150 units in stock\n  // ...other properties\n};\n\n// Order product - ordered from supplier\nconst customTShirt: IProduct<ProductTypes.Order> = {\n  type: ProductTypes.Order,\n  order: {\n    supplier: 'T-Shirt Co',\n    minimum: 25n, // Minimum order of 25 shirts\n    current: 12n  // 12 pre-orders so far\n  },\n  // ...other properties\n};\n```",
+                "kind": "text"
+              }
+            ]
+          }
+        ]
+      },
+      "TransactionType": {
+        "type": "string",
+        "enum": [
+          "debit",
+          "credit"
+        ],
+        "description": "Enumeration of transaction types for financial record keeping.\nDetermines the direction of money flow for the transaction."
+      },
+      "RefillMethods": {
+        "type": "string",
+        "enum": [
+          "cash",
+          "etransfer",
+          "creditCard",
+          "debitCard",
+          "stripe"
+        ],
+        "description": "Enumeration of supported payment methods for account refills.\nEach method may have different processing requirements and fees."
+      },
+      "RefillStatus": {
+        "type": "string",
+        "enum": [
+          "pending",
+          "complete",
+          "failed",
+          "cancelled"
+        ],
+        "description": "Enumeration of refill processing statuses.\nTracks the lifecycle of refill requests from initiation to completion."
+      },
+      "PreOrderStatus": {
+        "type": "string",
+        "enum": [
+          "ordered",
+          "fulfilled",
+          "cancelled",
+          "unordered"
+        ],
+        "description": "Enumeration of all possible pre-order status values.\nRepresents the lifecycle stages of a pre-order from initial placement to final resolution.",
+        "x-typia-jsDocTags": [
+          {
+            "name": "enum",
+            "text": [
+              {
+                "text": "*",
+                "kind": "text"
+              }
+            ]
+          },
+          {
+            "name": "example",
+            "text": [
+              {
+                "text": "```typescript\n// Creating a new pre-order\nconst newPreOrder: IPreOrder = {\n  // ...other properties\n  status: PreOrderStatus.Ordered\n};\n\n// Checking order status\nif (preOrder.status === PreOrderStatus.Fulfilled) {\n  console.log('Order has been completed and shipped');\n}\n```",
+                "kind": "text"
+              }
+            ]
+          }
+        ]
+      },
+      "StockEntryType": {
+        "type": "string",
+        "enum": [
+          "purchase",
+          "shrinkage",
+          "overage",
+          "sale"
+        ],
+        "description": "Enumeration of all possible stock entry types.\n\nThis enum defines the different reasons why stock levels might change,\neach with specific business logic and required properties. The enum values\nare used as discriminator properties in the type system to ensure type safety.",
+        "x-typia-jsDocTags": [
+          {
+            "name": "enum",
+            "text": [
+              {
+                "text": "*",
+                "kind": "text"
+              }
+            ]
+          },
+          {
+            "name": "example",
+            "text": [
+              {
+                "text": "```typescript\n// Using enum values for type discrimination\nconst createStockEntry = (type: StockEntryType, data: any) => {\n  switch (type) {\n    case StockEntryType.Purchase:\n      // TypeScript knows 'cost' property is required\n      return { ...data, cost: data.cost };\n    case StockEntryType.Sale:\n      // No additional properties required\n      return data;\n    // ... other cases\n  }\n};\n\n// Type-safe entry creation\nconst entry = createStockEntry(StockEntryType.Purchase, {\n  delta: 100n,\n  cost: 500n // Required for purchases\n});\n```",
+                "kind": "text"
+              }
+            ]
+          }
+        ]
+      },
+      "HTTPILedger": {
+        "oneOf": [
+          {
+            "type": "object",
+            "properties": {
+              "type": {
+                "type": "string",
+                "enum": [
+                  "transaction"
+                ],
+                "description": "Ledger discriminator for financial transactions",
+                "x-typia-required": true,
+                "x-typia-optional": false
+              },
+              "accountId": {
+                "type": "string",
+                "description": "Account ID that this transaction affects",
+                "x-typia-required": true,
+                "x-typia-optional": false
+              },
+              "transactionType": {
+                "$ref": "#/components/schemas/TransactionType",
+                "description": "Type of transaction (debit or credit)",
+                "x-typia-required": true,
+                "x-typia-optional": false
+              },
+              "products": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "name": {
+                      "type": "string",
+                      "description": "Product or service name",
+                      "x-typia-required": true,
+                      "x-typia-optional": false
+                    },
+                    "description": {
+                      "type": "string",
+                      "description": "Optional detailed description of the item",
+                      "x-typia-required": false,
+                      "x-typia-optional": true
+                    },
+                    "price": {
+                      "type": "string",
+                      "description": "Unit price as string for precise decimal representation",
+                      "x-typia-required": true,
+                      "x-typia-optional": false
+                    },
+                    "amount": {
+                      "type": "string",
+                      "description": "Quantity purchased as string for precise decimal representation",
+                      "x-typia-required": true,
+                      "x-typia-optional": false
+                    },
+                    "total": {
+                      "type": "string",
+                      "description": "Total cost for this item (price × amount) as string",
+                      "x-typia-required": true,
+                      "x-typia-optional": false
+                    }
+                  },
+                  "nullable": false,
+                  "required": [
+                    "name",
+                    "price",
+                    "amount",
+                    "total"
+                  ],
+                  "x-typia-jsDocTags": []
+                },
+                "description": "Array of items/services included in this transaction",
+                "x-typia-required": true,
+                "x-typia-optional": false
+              },
+              "total": {
+                "type": "string",
+                "description": "Total transaction amount in smallest currency unit",
+                "x-typia-required": true,
+                "x-typia-optional": false
+              },
+              "id": {
+                "type": "string",
+                "description": "Unique identifier for the ledger entry",
+                "x-typia-required": true,
+                "x-typia-optional": false
+              },
+              "createdAt": {
+                "type": "string",
+                "description": "Timestamp when the entry was created",
+                "x-typia-required": true,
+                "x-typia-optional": false
+              },
+              "updatedAt": {
+                "type": "string",
+                "description": "Timestamp when the entry was last updated",
+                "x-typia-required": true,
+                "x-typia-optional": false
+              },
+              "description": {
+                "type": "string",
+                "description": "Optional description or notes for the entry",
+                "x-typia-required": false,
+                "x-typia-optional": true
+              }
+            },
+            "nullable": false,
+            "required": [
+              "type",
+              "accountId",
+              "transactionType",
+              "products",
+              "total",
+              "id",
+              "createdAt",
+              "updatedAt"
+            ],
+            "x-typia-jsDocTags": []
+          },
+          {
+            "type": "object",
+            "properties": {
+              "type": {
+                "type": "string",
+                "enum": [
+                  "refill"
+                ],
+                "description": "Ledger discriminator for refills",
+                "x-typia-required": true,
+                "x-typia-optional": false
+              },
+              "account": {
+                "type": "string",
+                "description": "Account ID that will receive the refill credit",
+                "x-typia-required": true,
+                "x-typia-optional": false
+              },
+              "method": {
+                "$ref": "#/components/schemas/RefillMethods",
+                "description": "Payment method used for this refill",
+                "x-typia-required": true,
+                "x-typia-optional": false
+              },
+              "reference": {
+                "type": "string",
+                "description": "External reference ID from payment processor or receipt",
+                "x-typia-required": true,
+                "x-typia-optional": false
+              },
+              "amount": {
+                "type": "string",
+                "description": "Amount to be credited to user account (in smallest currency unit)",
+                "x-typia-required": true,
+                "x-typia-optional": false
+              },
+              "cost": {
+                "type": "string",
+                "description": "Total cost charged to user including processing fees (in smallest currency unit)",
+                "x-typia-required": true,
+                "x-typia-optional": false
+              },
+              "status": {
+                "$ref": "#/components/schemas/RefillStatus",
+                "description": "Current processing status of the refill",
+                "x-typia-required": true,
+                "x-typia-optional": false
+              },
+              "id": {
+                "type": "string",
+                "description": "Unique identifier for the ledger entry",
+                "x-typia-required": true,
+                "x-typia-optional": false
+              },
+              "createdAt": {
+                "type": "string",
+                "description": "Timestamp when the entry was created",
+                "x-typia-required": true,
+                "x-typia-optional": false
+              },
+              "updatedAt": {
+                "type": "string",
+                "description": "Timestamp when the entry was last updated",
+                "x-typia-required": true,
+                "x-typia-optional": false
+              },
+              "description": {
+                "type": "string",
+                "description": "Optional description or notes for the entry",
+                "x-typia-required": false,
+                "x-typia-optional": true
+              }
+            },
+            "nullable": false,
+            "required": [
+              "type",
+              "account",
+              "method",
+              "reference",
+              "amount",
+              "cost",
+              "status",
+              "id",
+              "createdAt",
+              "updatedAt"
+            ],
+            "x-typia-jsDocTags": []
+          },
+          {
+            "type": "object",
+            "properties": {
+              "type": {
+                "type": "string",
+                "enum": [
+                  "preOrder"
+                ],
+                "description": "Ledger type identifier for pre-orders",
+                "x-typia-required": true,
+                "x-typia-optional": false
+              },
+              "accountId": {
+                "type": "string",
+                "description": "ID of the customer account that placed this pre-order",
+                "x-typia-required": true,
+                "x-typia-optional": false
+              },
+              "productId": {
+                "type": "string",
+                "description": "ID of the product being pre-ordered",
+                "x-typia-required": true,
+                "x-typia-optional": false
+              },
+              "amount": {
+                "type": "string",
+                "description": "Quantity of items being pre-ordered (in smallest unit)",
+                "x-typia-required": true,
+                "x-typia-optional": false
+              },
+              "status": {
+                "$ref": "#/components/schemas/PreOrderStatus",
+                "description": "Current status of the pre-order in its lifecycle",
+                "x-typia-required": true,
+                "x-typia-optional": false
+              },
+              "id": {
+                "type": "string",
+                "description": "Unique identifier for the ledger entry",
+                "x-typia-required": true,
+                "x-typia-optional": false
+              },
+              "createdAt": {
+                "type": "string",
+                "description": "Timestamp when the entry was created",
+                "x-typia-required": true,
+                "x-typia-optional": false
+              },
+              "updatedAt": {
+                "type": "string",
+                "description": "Timestamp when the entry was last updated",
+                "x-typia-required": true,
+                "x-typia-optional": false
+              },
+              "description": {
+                "type": "string",
+                "description": "Optional description or notes for the entry",
+                "x-typia-required": false,
+                "x-typia-optional": true
+              }
+            },
+            "nullable": false,
+            "required": [
+              "type",
+              "accountId",
+              "productId",
+              "amount",
+              "status",
+              "id",
+              "createdAt",
+              "updatedAt"
+            ],
+            "x-typia-jsDocTags": []
+          },
+          {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string",
+                "description": "Unique identifier for the ledger entry",
+                "x-typia-required": true,
+                "x-typia-optional": false
+              },
+              "createdAt": {
+                "type": "string",
+                "description": "Timestamp when the entry was created",
+                "x-typia-required": true,
+                "x-typia-optional": false
+              },
+              "updatedAt": {
+                "type": "string",
+                "description": "Timestamp when the entry was last updated",
+                "x-typia-required": true,
+                "x-typia-optional": false
+              },
+              "type": {
+                "type": "string",
+                "enum": [
+                  "stock"
+                ],
+                "description": "Type discriminator for the ledger entry",
+                "x-typia-required": true,
+                "x-typia-optional": false
+              },
+              "description": {
+                "type": "string",
+                "description": "Optional description or notes for the entry",
+                "x-typia-required": false,
+                "x-typia-optional": true
+              },
+              "entryType": {
+                "$ref": "#/components/schemas/StockEntryType",
+                "description": "Categorisation of the stock entry",
+                "x-typia-required": true,
+                "x-typia-optional": false
+              },
+              "productId": {
+                "type": "string",
+                "description": "Reference to the product that was affected",
+                "x-typia-required": true,
+                "x-typia-optional": false
+              },
+              "delta": {
+                "type": "string",
+                "description": "Change in stock quantity (positive for increase, negative for decrease)",
+                "x-typia-required": true,
+                "x-typia-optional": false
+              },
+              "cost": {
+                "type": "string",
+                "description": "Cost per unit at time of purchase",
+                "x-typia-required": false,
+                "x-typia-optional": true
+              }
+            },
+            "nullable": false,
+            "required": [
+              "id",
+              "createdAt",
+              "updatedAt",
+              "type",
+              "entryType",
+              "productId",
+              "delta"
+            ],
+            "x-typia-jsDocTags": []
+          }
+        ],
+        "description": "Transforms an interface for HTTP transmission by converting BigInt and Date types to strings.\nThis type utility ensures all BigInt values become string representations and all Date\nobjects become ISO string representations, making the data JSON-serializable for HTTP APIs.",
+        "x-typia-jsDocTags": [
+          {
+            "name": "template",
+            "text": [
+              {
+                "text": "T",
+                "kind": "typeParameterName"
+              },
+              {
+                "text": " ",
+                "kind": "space"
+              },
+              {
+                "text": "The interface type to transform for HTTP transmission",
+                "kind": "text"
+              }
+            ]
+          },
+          {
+            "name": "example",
+            "text": [
+              {
+                "text": "```typescript\ninterface MyData {\n  id: string;\n  amount: bigint;\n  createdAt: Date;\n  count?: bigint;\n}\n\nconst httpData: HTTP<MyData> = {\n  id: \"123\",\n  amount: \"1000\",     // bigint → string\n  createdAt: \"2023-01-01T00:00:00.000Z\", // Date → string\n  count: \"5\"          // optional bigint → optional string\n};\n```",
+                "kind": "text"
+              }
+            ]
+          }
+        ]
+      },
+      "HTTPILedgerForm": {
+        "oneOf": [
+          {
+            "type": "object",
+            "properties": {
+              "type": {
+                "type": "string",
+                "enum": [
+                  "transaction"
+                ],
+                "description": "Ledger discriminator for financial transactions",
+                "x-typia-required": true,
+                "x-typia-optional": false
+              },
+              "description": {
+                "type": "string",
+                "description": "Optional description or notes for the entry",
+                "x-typia-required": false,
+                "x-typia-optional": true
+              },
+              "accountId": {
+                "type": "string",
+                "description": "Account ID that this transaction affects",
+                "x-typia-required": true,
+                "x-typia-optional": false
+              },
+              "transactionType": {
+                "$ref": "#/components/schemas/TransactionType",
+                "description": "Type of transaction (debit or credit)",
+                "x-typia-required": true,
+                "x-typia-optional": false
+              },
+              "products": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "name": {
+                      "type": "string",
+                      "description": "Product or service name",
+                      "x-typia-required": true,
+                      "x-typia-optional": false
+                    },
+                    "description": {
+                      "type": "string",
+                      "description": "Optional detailed description of the item",
+                      "x-typia-required": false,
+                      "x-typia-optional": true
+                    },
+                    "price": {
+                      "type": "string",
+                      "description": "Unit price as string for precise decimal representation",
+                      "x-typia-required": true,
+                      "x-typia-optional": false
+                    },
+                    "amount": {
+                      "type": "string",
+                      "description": "Quantity purchased as string for precise decimal representation",
+                      "x-typia-required": true,
+                      "x-typia-optional": false
+                    },
+                    "total": {
+                      "type": "string",
+                      "description": "Total cost for this item (price × amount) as string",
+                      "x-typia-required": true,
+                      "x-typia-optional": false
+                    }
+                  },
+                  "nullable": false,
+                  "required": [
+                    "name",
+                    "price",
+                    "amount",
+                    "total"
+                  ],
+                  "x-typia-jsDocTags": []
+                },
+                "description": "Array of items/services included in this transaction",
+                "x-typia-required": true,
+                "x-typia-optional": false
+              },
+              "total": {
+                "type": "string",
+                "description": "Total amount as string for form input validation",
+                "x-typia-required": true,
+                "x-typia-optional": false
+              }
+            },
+            "nullable": false,
+            "required": [
+              "type",
+              "accountId",
+              "transactionType",
+              "products",
+              "total"
+            ],
+            "x-typia-jsDocTags": []
+          },
+          {
+            "type": "object",
+            "properties": {
+              "account": {
+                "type": "string",
+                "description": "Account ID that will receive the refill credit",
+                "x-typia-required": true,
+                "x-typia-optional": false
+              },
+              "method": {
+                "$ref": "#/components/schemas/RefillMethods",
+                "description": "Selected payment method",
+                "x-typia-required": true,
+                "x-typia-optional": false
+              },
+              "amount": {
+                "type": "string",
+                "description": "Desired refill amount (excluding fees)",
+                "x-typia-required": true,
+                "x-typia-optional": false
+              }
+            },
+            "nullable": false,
+            "required": [
+              "account",
+              "method",
+              "amount"
+            ],
+            "x-typia-jsDocTags": []
+          },
+          {
+            "type": "object",
+            "properties": {
+              "type": {
+                "type": "string",
+                "enum": [
+                  "preOrder"
+                ],
+                "description": "Ledger type identifier for pre-orders",
+                "x-typia-required": true,
+                "x-typia-optional": false
+              },
+              "description": {
+                "type": "string",
+                "description": "Optional description or notes for the entry",
+                "x-typia-required": false,
+                "x-typia-optional": true
+              },
+              "status": {
+                "$ref": "#/components/schemas/PreOrderStatus",
+                "description": "Current status of the pre-order in its lifecycle",
+                "x-typia-required": true,
+                "x-typia-optional": false
+              },
+              "amount": {
+                "type": "string",
+                "description": "Quantity of items being pre-ordered (in smallest unit)",
+                "x-typia-required": true,
+                "x-typia-optional": false
+              },
+              "productId": {
+                "type": "string",
+                "description": "ID of the product being pre-ordered",
+                "x-typia-required": true,
+                "x-typia-optional": false
+              },
+              "accountId": {
+                "type": "string",
+                "description": "ID of the customer account that placed this pre-order",
+                "x-typia-required": true,
+                "x-typia-optional": false
+              }
+            },
+            "nullable": false,
+            "required": [
+              "type",
+              "status",
+              "amount",
+              "productId",
+              "accountId"
+            ],
+            "x-typia-jsDocTags": []
+          },
+          {
+            "type": "object",
+            "properties": {
+              "delta": {
+                "type": "string",
+                "description": "Change in stock quantity (positive for increase, negative for decrease)",
+                "x-typia-required": true,
+                "x-typia-optional": false
+              },
+              "description": {
+                "type": "string",
+                "description": "Optional description or notes for the entry",
+                "x-typia-required": false,
+                "x-typia-optional": true
+              },
+              "entryType": {
+                "$ref": "#/components/schemas/StockEntryType",
+                "description": "Categorisation of the stock entry",
+                "x-typia-required": true,
+                "x-typia-optional": false
+              },
+              "productId": {
+                "type": "string",
+                "description": "Reference to the product that was affected",
+                "x-typia-required": true,
+                "x-typia-optional": false
+              },
+              "cost": {
+                "type": "string",
+                "description": "Cost per unit at time of purchase",
+                "x-typia-required": false,
+                "x-typia-optional": true
+              }
+            },
+            "nullable": false,
+            "required": [
+              "delta",
+              "entryType",
+              "productId"
+            ],
+            "x-typia-jsDocTags": []
+          }
+        ],
+        "description": "Transforms an interface for HTTP transmission by converting BigInt and Date types to strings.\nThis type utility ensures all BigInt values become string representations and all Date\nobjects become ISO string representations, making the data JSON-serializable for HTTP APIs.",
+        "x-typia-jsDocTags": [
+          {
+            "name": "template",
+            "text": [
+              {
+                "text": "T",
+                "kind": "typeParameterName"
+              },
+              {
+                "text": " ",
+                "kind": "space"
+              },
+              {
+                "text": "The interface type to transform for HTTP transmission",
+                "kind": "text"
+              }
+            ]
+          },
+          {
+            "name": "example",
+            "text": [
+              {
+                "text": "```typescript\ninterface MyData {\n  id: string;\n  amount: bigint;\n  createdAt: Date;\n  count?: bigint;\n}\n\nconst httpData: HTTP<MyData> = {\n  id: \"123\",\n  amount: \"1000\",     // bigint → string\n  createdAt: \"2023-01-01T00:00:00.000Z\", // Date → string\n  count: \"5\"          // optional bigint → optional string\n};\n```",
+                "kind": "text"
+              }
+            ]
+          }
+        ]
+      },
+      "object": {
+        "type": "object",
+        "properties": {},
+        "nullable": false,
+        "x-typia-jsDocTags": []
+      },
+      "AccountFormTypes": {
+        "type": "string",
+        "enum": [
+          "settings",
+          "password"
+        ],
+        "description": "Enumeration of account form types for different update operations.\nUsed to distinguish between settings updates and password changes.",
+        "x-typia-jsDocTags": [
+          {
+            "name": "remarks",
+            "text": [
+              {
+                "text": "This enum helps in routing form submissions to the appropriate handlers.",
+                "kind": "text"
+              }
+            ]
+          },
+          {
+            "name": "see",
+            "text": [
+              {
+                "text": "IAccountSettingsForm",
+                "kind": "text"
+              },
+              {
+                "text": " ",
+                "kind": "space"
+              },
+              {
+                "text": "*",
+                "kind": "text"
+              }
+            ]
+          },
+          {
+            "name": "see",
+            "text": [
+              {
+                "text": "IAccountPasswordForm",
+                "kind": "text"
+              },
+              {
+                "text": " ",
+                "kind": "space"
+              },
+              {
+                "text": "*",
+                "kind": "text"
+              }
+            ]
+          },
+          {
+            "name": "example",
+            "text": [
+              {
+                "text": "// Example usage:\nfunction handleAccountUpdate(type: AccountFormTypes, formData: IAccountSettingsForm | IAccountPasswordForm) {\n if (type === AccountFormTypes.Settings) {\n  // Handle settings update\n } else if (type === AccountFormTypes.Password) {\n // Handle password change\n}\n}",
+                "kind": "text"
+              }
+            ]
+          }
+        ]
+      },
+      "LedgerType": {
+        "type": "string",
+        "enum": [
+          "refill",
+          "preOrder",
+          "stock",
+          "transaction"
+        ],
+        "description": "Enumeration of all supported ledger entry types.\n\nUsed for type discrimination and categorization of ledger entries.\nEach enum value corresponds to a specific ledger operation type."
+      },
+      "StatsDateRange": {
+        "type": "string",
+        "enum": [
+          "all",
+          "1d",
+          "1w",
+          "1m",
+          "3m",
+          "1y"
+        ],
+        "description": "Enumeration of available date range filters for statistical queries.\nUsed to specify the time period for generating statistics and reports."
+      }
+    }
+  }
+}
