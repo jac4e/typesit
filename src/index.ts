@@ -17,6 +17,7 @@
 
 import { keys } from 'ts-transformer-keys';
 import { IAccount, IAccountBaseForm, IAccountDocument, isIAccount, keysIAccount } from './account.js';
+import { IApiKey, IApiKeyCreateForm, IApiKeyDocument, isIApiKey, keysIApiKey } from './api-key.js';
 import { IProduct, IProductDocument, IProductForm, ProductTypes, isIProduct, keysIProduct, keysIProductOrder, keysIProductStock } from './product.js';
 import { isITransaction, ITransaction, ITransactionDocument, ITransactionForm, keysITransaction } from './ledgers/transaction.js';
 import { IPreOrder, IPreOrderDocument, IPreOrderForm, isIPreOrder, keysIPreOrder } from './ledgers/preorders.js';
@@ -25,6 +26,7 @@ import { isIRefill, keysIRefill } from './ledgers/refill.js';
 import { isILedger } from './ledgers/ledgers.js';
 
 export * from './account.js';
+export * from './api-key.js';
 // export { IAccount, ICredentials, IAccountDocument, IAccountForm, Roles, isIAccount, isIAccountForm, isICredentials } from './account.js';
 export * from './cart.js';
 // export { ICartItem, ICartItemSerialized, ICart, ICartSerialized, isICartItem, isICart, isICartSerialized } from './cart.js';
@@ -47,13 +49,14 @@ export * from './task.js';
 /**
  * Union type of all available object types that can be processed by utility functions
  */
-export type AvailableTypes = IAccount | ITransaction | IProduct | IProduct<ProductTypes.Stock> | IProduct<ProductTypes.Order> | IPreOrder | IStockEntry;
+export type AvailableTypes = IAccount | IApiKey | ITransaction | IProduct | IProduct<ProductTypes.Stock> | IProduct<ProductTypes.Order> | IPreOrder | IStockEntry;
 
 /**
  * Type that converts given interface types to their corresponding Mongoose document types
  * @template Type The interface type to convert
  */
 export type MongooseDocumentType<Type> = Type extends IAccount ? IAccountDocument :
+    Type extends IApiKey ? IApiKeyDocument :
     Type extends ITransaction ? ITransactionDocument :
     Type extends IProduct ? IProductDocument :
     Type extends IProduct<ProductTypes.Stock> ? IProductDocument<ProductTypes.Stock> :
@@ -66,7 +69,7 @@ export type MongooseDocumentType<Type> = Type extends IAccount ? IAccountDocumen
  * Type to transform ITypes to their corresponding ITypeForm types.
  * 
  */
-export type FormType<T> = T extends IAccount ? IAccountBaseForm : T extends ITransaction ? ITransactionForm : T extends IProduct ? IProductForm : T extends IProduct<ProductTypes.Stock> ? IProductForm<ProductTypes.Stock> : T extends IProduct<ProductTypes.Order> ? IProductForm<ProductTypes.Order> : T extends IPreOrder ? IPreOrderForm : T extends IStockEntry ? IStockEntryForm : never;
+export type FormType<T> = T extends IAccount ? IAccountBaseForm : T extends IApiKey ? IApiKeyCreateForm : T extends ITransaction ? ITransactionForm : T extends IProduct ? IProductForm : T extends IProduct<ProductTypes.Stock> ? IProductForm<ProductTypes.Stock> : T extends IProduct<ProductTypes.Order> ? IProductForm<ProductTypes.Order> : T extends IPreOrder ? IPreOrderForm : T extends IStockEntry ? IStockEntryForm : never;
 
 /**
  * Extracts all possible keys from a union type as a union of key types
@@ -106,6 +109,8 @@ export type UnionKeysValues<Type> = Type extends Type ? {key: UnionKeys<Type>, v
 export function getKeys<Type>(obj: Type) {
     if (isIAccount(obj)) {
         return keysIAccount as (UnionKeys<Type>)[];
+    } else if (isIApiKey(obj)) {
+        return keysIApiKey as (UnionKeys<Type>)[];
     } else if (isITransaction(obj)) {
         return keysITransaction as (UnionKeys<Type>)[];
     } else if (isIProduct(obj, ProductTypes.Order)) {
