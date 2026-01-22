@@ -10,10 +10,11 @@
     "watch": "npx tsc -w",
     "test": "npx jest",
     "prepare": "ts-patch install && typia patch && npm run build",
+  "schemas": "npm run build && node lib/generate-schemas.js",
     "docs": "typedoc --options ./typedoc.json"
   },
   "author": "",
-  "license": "AGPL",
+  "license": "AGPL-3.0-only",
   "dependencies": {
     "@types/mongoose": "^8.19.0",
     "ts-transformer-keys": "^0.4.3",
